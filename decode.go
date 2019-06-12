@@ -10,7 +10,7 @@ import (
 //TODO: unmarshal takes a string and parses it to return a hobbit message
 //TODO: check error messages
 
-//TODO: DOCUMENT THIS SHIT
+// Unmarshal unmarshals the message into a type Message
 func Unmarshal(req string) (Message, error) {
 	var decoded Message
 
@@ -21,7 +21,7 @@ func Unmarshal(req string) (Message, error) {
 
 	metadata := strings.Split(lines[0], " ")
 	if len(metadata) != 7 {
-		return Message{}, errors.New("not enough metadata for parsing")
+		return Message{}, errors.New("not all metadata provided")
 	}
 
 	if !regexp.MustCompile(`^(\d+\.)(\d+)*$`).MatchString(metadata[1]) {
