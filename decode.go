@@ -7,10 +7,9 @@ import (
 	"strings"
 )
 
-//TODO: unmarshal takes a string and parses it to return a hobbit message
 //TODO: check error messages
 
-// Unmarshal unmarshals the message into a type Message
+// Unmarshal takes a string and parses it to return a hobbit message
 func Unmarshal(message string) (Message, error) {
 	var decoded Message
 
@@ -34,12 +33,14 @@ func Unmarshal(message string) (Message, error) {
 	}
 	decoded.Protocol = metadata[2]
 
-	if !regexp.MustCompile(`^(\d+\.)(\d+)*$`).MatchString(metadata[3]) {
+	re := regexp.MustCompile(`^[a-z0-9_]*$`)
+
+	if !re.MatchString(metadata[3]) {
 		return Message{}, errors.New("incorrect metadata format, cannot parse compression")
 	}
 	decoded.Compression = metadata[3]
 
-	if !regexp.MustCompile(`^(\d+\.)(\d+)*$`).MatchString(metadata[4]) {
+	if !re.MatchString(metadata[4]) {
 		return Message{}, errors.New("incorrect metadata format, cannot parse encoding")
 	}
 	decoded.Encoding = metadata[4]
@@ -50,11 +51,11 @@ func Unmarshal(message string) (Message, error) {
 	}
 	decoded.Headers = []byte(lines[1][:headLength])
 
-	bodyLength, err := strconv.Atoi(metadata[6]) // do we even need this?
+	bodyLength, err := strconv.Atoi(metadata[6])
 	if err != nil {
 		return Message{}, errors.New("incorrect metadata format, cannot parse body-length")
 	}
-	decoded.Body = []byte(lines[1][headLength:bodyLength])
+	decoded.Body = []byte(lines[1][headLength:headLength+bodyLength])
 
 	return decoded, nil
 }
