@@ -14,36 +14,36 @@ func TestMarshal_Successful(t *testing.T) {
 	}{
 		{
 			encoded: Message{
-				Version: "13.05",
-				Protocol: "RPC",
+				Version:     "13.05",
+				Protocol:    "RPC",
 				Compression: "blahblahblah",
-				Encoding: "json",
-				Headers: []byte("this is a header"),
-				Body: []byte("this is a body"),
+				Encoding:    "json",
+				Headers:     []byte("this is a header"),
+				Body:        []byte("this is a body"),
 			},
-			message: "EWP 13.05 RPC blahblahblah JSON 16 14\nthis is a headerthis is a body",
+			message: "EWP 13.05 RPC blahblahblah json 16 14\nthis is a headerthis is a body",
 		},
 		{
 			encoded: Message{
-				Version: "13.05",
-				Protocol: "GOSSIP",
+				Version:     "13.05",
+				Protocol:    "GOSSIP",
 				Compression: "blahblahb123_f",
-				Encoding: "bson",
-				Headers: []byte("testing"),
-				Body: []byte("testing body"),
+				Encoding:    "bson",
+				Headers:     []byte("testing"),
+				Body:        []byte("testing body"),
 			},
-			message: "EWP 13.05 GOSSIP blahblahb123_f BSON 7 12\ntestingtesting body",
+			message: "EWP 13.05 GOSSIP blahblahb123_f bson 7 12\ntestingtesting body",
 		},
 		{
 			encoded: Message{
-				Version: "1230329483.05392489",
-				Protocol: "RPC",
+				Version:     "1230329483.05392489",
+				Protocol:    "RPC",
 				Compression: "blahblahblah",
-				Encoding: "json",
-				Headers: []byte("test"),
-				Body: []byte("test"),
+				Encoding:    "json",
+				Headers:     []byte("test"),
+				Body:        []byte("test"),
 			},
-			message: "EWP 1230329483.05392489 RPC blahblahblah JSON 4 4\ntesttest",
+			message: "EWP 1230329483.05392489 RPC blahblahblah json 4 4\ntesttest",
 		},
 	}
 
@@ -60,40 +60,51 @@ func TestMarshal_Successful(t *testing.T) {
 func TestMarshal_Unsuccessful(t *testing.T) {
 	var test = []struct {
 		encoded Message
-		err error
+		err     error
 	}{
 		{
 			encoded: Message{
-				Version: "",
-				Protocol: "RPC",
+				Version:     "",
+				Protocol:    "RPC",
 				Compression: "blahblahblah",
-				Encoding: "JSON",
-				Headers: []byte("this is a header"),
-				Body: []byte("this is a body"),
+				Encoding:    "json",
+				Headers:     []byte("this is a header"),
+				Body:        []byte("this is a body"),
 			},
 			err: errors.New("cannot marshal message, version not found"),
 		},
 		{
 			encoded: Message{
-				Version: "13.05",
-				Protocol: "GOSSIP",
+				Version:     "13.05",
+				Protocol:    "GOSSIP",
 				Compression: "",
-				Encoding: "BSON",
-				Headers: []byte("testing"),
-				Body: []byte("testing body"),
+				Encoding:    "bson",
+				Headers:     []byte("testing"),
+				Body:        []byte("testing body"),
 			},
 			err: errors.New("cannot marshal message, compression not found"),
 		},
 		{
 			encoded: Message{
-				Version: "1230329483.05392489",
-				Protocol: "RPC",
+				Version:     "1230329483.05392489",
+				Protocol:    "RPC",
 				Compression: "blahblahblah",
-				Encoding: "",
-				Headers: []byte("test"),
-				Body: []byte("test"),
+				Encoding:    "",
+				Headers:     []byte("test"),
+				Body:        []byte("test"),
 			},
 			err: errors.New("cannot marshal message, encoding not found"),
+		},
+		{
+			encoded: Message{
+				Version:     "1230329483.05392489",
+				Protocol:    "",
+				Compression: "blahblahblah",
+				Encoding:    "json",
+				Headers:     []byte("test"),
+				Body:        []byte("test"),
+			},
+			err: errors.New("cannot marshal message, protocol not found"),
 		},
 	}
 

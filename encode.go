@@ -1,11 +1,11 @@
 package hobbits
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
 
-// Marshal takes in Message type and returns a string
+// Unmarshal takes a hobbit message and encodes it to a string
 func Marshal(message Message) (string, error) {
 	if message.Version == "" {
 		return "", errors.New("cannot marshal message, version not found")
