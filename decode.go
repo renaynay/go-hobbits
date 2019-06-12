@@ -11,10 +11,10 @@ import (
 //TODO: check error messages
 
 // Unmarshal unmarshals the message into a type Message
-func Unmarshal(req string) (Message, error) {
+func Unmarshal(message string) (Message, error) {
 	var decoded Message
 
-	lines := strings.Split(req, "\n")
+	lines := strings.Split(message, "\n")
 	if len(lines) != 2 {
 		return Message{}, errors.New("message request must contain 2 lines")
 	}
