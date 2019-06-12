@@ -24,7 +24,7 @@ func Marshal(message Message) (string, error) {
 	}
 
 	return fmt.Sprintf(
-		"EWP %s %s %s %s %d %d/n%s%s",
+		"EWP %s %s %s %s %d %d\n%s%s",
 		message.Version,
 		message.Protocol,
 		message.Compression,
