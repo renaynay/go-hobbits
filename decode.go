@@ -44,19 +44,17 @@ func Unmarshal(req string) (Message, error) {
 	}
 	decoded.Encoding = metadata[4]
 
-	headLength, err := strconv.Atoi(metadata[4])
+	headLength, err := strconv.Atoi(metadata[5])
 	if err != nil {
-		// throw an error?
+		return Message{}, errors.New("incorrect metadata format, cannot parse header-length")
 	}
-	decoded.Headers = []byte(metadata[6][:headLength]) // does this work how i want it to?
+	decoded.Headers = []byte(lines[1][:headLength])
 
-	bodyLength, err := strconv.Atoi(metadata[5]) // do we even need this?
+	bodyLength, err := strconv.Atoi(metadata[6]) // do we even need this?
 	if err != nil {
-		// throw an error
+		return Message{}, errors.New("incorrect metadata format, cannot parse body-length")
 	}
-	if bodyLength > 0 {
-		decoded.Body = []byte(metadata[6][headLength:])
-	}
+	decoded.Body = []byte(lines[1][headLength:bodyLength])
 
 	return decoded, nil
 }
