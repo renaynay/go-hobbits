@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/renaynay/go-hobbits/encoding"
 )
@@ -30,14 +31,22 @@ func TestNewServer(t *testing.T) {
 }
 
 func TestTCP(t *testing.T) {
-	server := NewServer("", 1123)
+	server := NewServer("127.0.0.1", 0)
 	ch := make(chan encoding.Message)
 
 	go server.Listen(func(_ net.Conn, message encoding.Message) {
 		ch <- message
 	})
 
-	conn, err := net.Dial("tcp", ":1123")
+	for {
+		if server.Addr() != nil {
+			break
+		}
+
+		time.Sleep(1)
+	}
+
+	conn, err := net.Dial("tcp", server.Addr().String())
 	if err != nil {
 		t.Error("could not connect to TCP server: ", err)
 	}

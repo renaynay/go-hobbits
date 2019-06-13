@@ -16,6 +16,8 @@ type Callback func(net.Conn, encoding.Message)
 type Server struct {
 	host string
 	port int
+
+	l net.Listener
 }
 
 // NewServer creates a new server
@@ -31,6 +33,8 @@ func (s *Server) Listen(c Callback) error {
 	}
 	defer listen.Close()
 
+	s.l = listen
+
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
@@ -39,6 +43,10 @@ func (s *Server) Listen(c Callback) error {
 
 		go handle(conn, c)
 	}
+}
+
+func (s Server) Addr() net.Addr {
+	return s.l.Addr()
 }
 
 // handle handles incoming requests
