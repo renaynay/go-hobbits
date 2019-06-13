@@ -2,7 +2,7 @@
 // Multiclient Wire Protocol For ETH2.0 Communications.
 //
 // By Rene Nayman
-package hobbits
+package encoding
 
 // Message represents a parsed Hobbits message.
 // See examples of unparsed and parsed messages here: https://github.com/deltap2p/hobbits/blob/master/specs/protocol.md

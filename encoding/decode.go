@@ -1,4 +1,4 @@
-package hobbits
+package encoding
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-var AlphaNumRegex = regexp.MustCompile(`^[a-z0-9_]*$`)
-var VersionNumRegex = regexp.MustCompile(`^(\d+\.)(\d+)*$`)
+var alphaNumRegex = regexp.MustCompile(`^[a-z0-9_]*$`)
+var versionNumRegex = regexp.MustCompile(`^(\d+\.)(\d+)*$`)
 
 // Unmarshal takes a wire protocol message and parses it
 func Unmarshal(message string) (*Message, error) {
@@ -24,7 +24,7 @@ func Unmarshal(message string) (*Message, error) {
 		return nil, errors.New("not all metadata provided")
 	}
 
-	if !VersionNumRegex.MatchString(metadata[1]) {
+	if !versionNumRegex.MatchString(metadata[1]) {
 		return nil, errors.New("EWP version cannot be parsed")
 	}
 	decoded.Version = metadata[1]
@@ -36,12 +36,12 @@ func Unmarshal(message string) (*Message, error) {
 
 
 
-	if !AlphaNumRegex.MatchString(metadata[3]) {
+	if !alphaNumRegex.MatchString(metadata[3]) {
 		return nil, errors.New("incorrect metadata format, cannot parse compression")
 	}
 	decoded.Compression = metadata[3]
 
-	if !AlphaNumRegex.MatchString(metadata[4]) {
+	if !alphaNumRegex.MatchString(metadata[4]) {
 		return nil, errors.New("incorrect metadata format, cannot parse encoding")
 	}
 	decoded.Encoding = metadata[4]

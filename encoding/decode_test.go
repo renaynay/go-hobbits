@@ -1,4 +1,4 @@
-package hobbits
+package encoding
 
 import (
 	"errors"
