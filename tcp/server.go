@@ -43,7 +43,7 @@ func (*Server) handle(conn net.Conn, callback func(net.Conn, encoding.Message)) 
 	buf := make([]byte, 1024)
 
 	_, err := conn.Read(buf)
-	_, err := conn.Read(buf)
+	_, err = conn.Read(buf)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error reading: %s", err.Error()))
 	}
