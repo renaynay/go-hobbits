@@ -1,37 +1,27 @@
-//TODO: godocs
+// Package tcp is a framework for a TCP server that will be able to handle TCP transport
+// It will also decode inbound messages and encode outbound messages
 package tcp
 
 import (
 	"errors"
 	"fmt"
 	"net"
-	"os"
 
 	"github.com/renaynay/go-hobbits/encoding"
 )
 
-const (
-	CONN_HOST = "localhost"
-	CONN_PORT = "3333"
-	CONN_TYPE = "tcp"
-)
-
-//TODO: shouldn't be in a main func
-
 // Listens for incoming connections.
-func listen() error {
-	listen, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
+func Listen(connType string, connHost string, connPort string) error {
+	listen, err := net.Listen(connType, connHost+":"+connPort)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error listening: %s", (err.Error())))
-		os.Exit(1)
 	}
 	defer listen.Close()
 
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
-			fmt.Println("Error accepting: ", err.Error())
-			os.Exit(1)
+			return err
 		}
 
 		go handleRequest(conn)
@@ -50,19 +40,20 @@ func handleRequest(conn net.Conn) error {
 		return errors.New(fmt.Sprintf("Error reading: %s", err.Error()))
 	}
 
+	// Decodes data
 	_, err = encoding.Unmarshal(string(buf)) // TODO: what do I do with the unmarshaled message? should it be left blank bc this is a framework ?
 	if err != nil {
-		fmt.Println(err) // TODO: do i need to print?
 		return err
 	}
 
 	return nil
 }
 
-func sendMessage(conn net.Conn, message encoding.Message) error { // TODO: where does this get called?
+// Sends an encoded message
+func SendMessage(conn net.Conn, message encoding.Message) error { // TODO: where does this get called?
+	// Encodes the message
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
-		fmt.Println(err) // TODO do i need to print?
 		return err
 	}
 
