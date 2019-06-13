@@ -10,7 +10,8 @@ import (
 	"github.com/renaynay/go-hobbits/encoding"
 )
 
-type callback func(net.Conn, encoding.Message)
+// Callback is a function for message handling
+type Callback func(net.Conn, encoding.Message)
 
 type Server struct {
 	host string
@@ -23,7 +24,7 @@ func NewServer(host string, port int) *Server {
 }
 
 // Listen listens for incoming connections.
-func (s *Server) Listen(c callback) error {
+func (s *Server) Listen(c Callback) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error listening: %s", (err.Error())))
@@ -41,7 +42,7 @@ func (s *Server) Listen(c callback) error {
 }
 
 // handle handles incoming requests.
-func (*Server) handle(conn net.Conn, c callback) error {
+func (*Server) handle(conn net.Conn, c Callback) error {
 	buf := make([]byte, 1024) // TODO: do this better
 
 	_, err := conn.Read(buf)
