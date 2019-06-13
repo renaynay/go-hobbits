@@ -27,13 +27,13 @@ func TestNewServer(t *testing.T) {
 }
 
 func TestServer_Listen(t *testing.T) {
+	//TODO: complete test
+}
 
+func Test_handle(t *testing.T) {
+	//TODO: complete test
 }
 
 func TestServer_SendMessage(t *testing.T) {
-
-}
-
-func Test_send(t *testing.T) {
-
+	//TODO: complete test
 }
