@@ -10,9 +10,19 @@ import (
 	"github.com/renaynay/go-hobbits/encoding"
 )
 
+type Server struct {
+	host string
+	port int
+}
+
+// Creates a new server
+func NewServer(host string, port int) *Server {
+	return &Server{host: host, port: port}
+}
+
 // Listens for incoming connections.
-func Listen(host string, port int, callback func(net.Conn, encoding.Message)) error {
-	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
+func (s *Server) Listen(callback func(net.Conn, encoding.Message)) error {
+	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error listening: %s", (err.Error())))
 	}
@@ -26,12 +36,10 @@ func Listen(host string, port int, callback func(net.Conn, encoding.Message)) er
 
 		go handleRequest(conn, callback)
 	}
-
-	return nil
 }
 
 // Handles incoming requests.
-func handleRequest(conn net.Conn, callback func(net.Conn, encoding.Message)) error {
+func (*Server) handle(conn net.Conn, callback func(net.Conn, encoding.Message)) error {
 	buf := make([]byte, 1024)
 
 	_, err := conn.Read(buf)
@@ -50,14 +58,21 @@ func handleRequest(conn net.Conn, callback func(net.Conn, encoding.Message)) err
 }
 
 // Sends an encoded message
-func SendMessage(conn net.Conn, message encoding.Message) error {
+func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
 		return err
 	}
 
-	conn.Write([]byte(encoded))
-	conn.Close()
+	_, err = conn.Write([]byte(encoded))
+	if err != nil {
+		return err
+	}
+
+	err = conn.Close()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
