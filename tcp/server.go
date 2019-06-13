@@ -17,7 +17,7 @@ type Server struct {
 	host string
 	port int
 
-	l net.Listener
+	addr net.Addr
 }
 
 // NewServer creates a new server
@@ -33,7 +33,7 @@ func (s *Server) Listen(c Callback) error {
 	}
 	defer listen.Close()
 
-	s.l = listen
+	s.addr = listen.Addr()
 
 	for {
 		conn, err := listen.Accept()
@@ -46,7 +46,7 @@ func (s *Server) Listen(c Callback) error {
 }
 
 func (s Server) Addr() net.Addr {
-	return s.l.Addr()
+	return s.addr
 }
 
 // handle handles incoming requests

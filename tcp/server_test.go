@@ -1,37 +1,17 @@
-package tcp
+package tcp_test
 
 import (
 	"net"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 
 	"github.com/renaynay/go-hobbits/encoding"
+	"github.com/renaynay/go-hobbits/tcp"
 )
 
-func TestNewServer(t *testing.T) {
-	var test = []struct {
-		host   string
-		port   int
-		server *Server
-	}{
-		{host: "test", port: 3333, server: &Server{host: "test", port: 3333}},
-		{host: "host", port: 4000, server: &Server{host: "host", port: 4000}},
-	}
-
-	for i, tt := range test {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			server := NewServer(tt.host, tt.port)
-			if !reflect.DeepEqual(&server, &tt.server) {
-				t.Errorf("return value of NewServer does not match expected value")
-			}
-		})
-	}
-}
-
 func TestTCP(t *testing.T) {
-	server := NewServer("127.0.0.1", 0)
+	server := tcp.NewServer("127.0.0.1", 0)
 	ch := make(chan encoding.Message)
 
 	go server.Listen(func(_ net.Conn, message encoding.Message) {
