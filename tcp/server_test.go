@@ -26,14 +26,27 @@ func TestNewServer(t *testing.T) {
 	}
 }
 
-func TestServer_Listen(t *testing.T) {
-	//TODO: complete test
-}
+// TODO: this isn't a unit-test type test, it's more of an integration test
+// TODO:
+//  1) pipe a channel through handle (do this by creating a chan in callback?)
+//  2) ignore conn
 
-func Test_handle(t *testing.T) {
-	//TODO: complete test
-}
 
-func TestServer_SendMessage(t *testing.T) {
-	//TODO: complete test
-}
+
+//func TestServer_Listen(t *testing.T) {
+//	//TODO: complete test
+//}
+//
+//func Test_handle(t *testing.T) {
+//	var test = []struct {
+//		conn net.Conn
+//		c Callback
+//	}{
+//		{}
+//	}
+//	//TODO: complete test
+//}
+//
+//func TestServer_SendMessage(t *testing.T) {
+//	//TODO: complete test
+//}
