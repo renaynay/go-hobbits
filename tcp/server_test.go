@@ -47,6 +47,6 @@ func TestTCP(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(expected, read) {
-		t.Error("return value from TCP server does not match expected value")
+		t.Errorf("return value from TCP server does not match expected value. want=%v, got=%v", expected, read)
 	}
 }
