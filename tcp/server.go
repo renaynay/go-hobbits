@@ -5,6 +5,7 @@ package tcp
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 
 	"github.com/renaynay/go-hobbits/encoding"
@@ -43,14 +44,12 @@ func (s *Server) Listen(c Callback) error {
 
 // handle handles incoming requests
 func (*Server) handle(conn net.Conn, c Callback) error {
-	buf := make([]byte, 1024) // TODO: do this better
-
-	_, err := conn.Read(buf)
+	read, err := ioutil.ReadAll(conn)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error reading: %s", err.Error())) // TODO: clean up error
 	}
 
-	decoded, err := encoding.Unmarshal(string(buf))
+	decoded, err := encoding.Unmarshal(string(read))
 	if err != nil {
 		return err
 	}
