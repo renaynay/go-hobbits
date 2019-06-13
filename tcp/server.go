@@ -10,6 +10,8 @@ import (
 	"github.com/renaynay/go-hobbits/encoding"
 )
 
+type callback func(net.Conn, encoding.Message)
+
 type Server struct {
 	host string
 	port int
@@ -21,7 +23,7 @@ func NewServer(host string, port int) *Server {
 }
 
 // Listen listens for incoming connections.
-func (s *Server) Listen(callback func(net.Conn, encoding.Message)) error {
+func (s *Server) Listen(c callback) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error listening: %s", (err.Error())))
@@ -34,18 +36,17 @@ func (s *Server) Listen(callback func(net.Conn, encoding.Message)) error {
 			return err
 		}
 
-		go s.handle(conn, callback)
+		go s.handle(conn, c)
 	}
 }
 
 // handle handles incoming requests.
-func (*Server) handle(conn net.Conn, callback func(net.Conn, encoding.Message)) error {
-	buf := make([]byte, 1024)
+func (*Server) handle(conn net.Conn, c callback) error {
+	buf := make([]byte, 1024) // TODO: do this better
 
 	_, err := conn.Read(buf)
-	_, err = conn.Read(buf)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error reading: %s", err.Error()))
+		return errors.New(fmt.Sprintf("Error reading: %s", err.Error())) // TODO: clean up error
 	}
 
 	decoded, err := encoding.Unmarshal(string(buf))
@@ -53,7 +54,7 @@ func (*Server) handle(conn net.Conn, callback func(net.Conn, encoding.Message)) 
 		return err
 	}
 
-	go callback(conn, *decoded)
+	go c(conn, *decoded)
 
 	return nil
 }

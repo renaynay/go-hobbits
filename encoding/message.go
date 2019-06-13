@@ -1,4 +1,4 @@
-// Package hobbits is a go implementation of Hobbits, a Lightweight,
+// Package encoding implements message encoding and decoding for Hobbits, a Lightweight,
 // Multiclient Wire Protocol For ETH2.0 Communications.
 //
 // By Rene Nayman
