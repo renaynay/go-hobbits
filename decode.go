@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+var AlphaNumRegex = regexp.MustCompile(`^[a-z0-9_]*$`)
+var VersionNumRegex = regexp.MustCompile(`^(\d+\.)(\d+)*$`)
+
 //TODO: check error messages
 
 // Unmarshal takes a string and parses it to return a hobbit message
@@ -23,7 +26,7 @@ func Unmarshal(message string) (Message, error) {
 		return Message{}, errors.New("not all metadata provided")
 	}
 
-	if !regexp.MustCompile(`^(\d+\.)(\d+)*$`).MatchString(metadata[1]) {
+	if !VersionNumRegex.MatchString(metadata[1]) {
 		return Message{}, errors.New("EWP version cannot be parsed")
 	}
 	decoded.Version = metadata[1]
@@ -33,14 +36,14 @@ func Unmarshal(message string) (Message, error) {
 	}
 	decoded.Protocol = metadata[2]
 
-	re := regexp.MustCompile(`^[a-z0-9_]*$`)
 
-	if !re.MatchString(metadata[3]) {
+
+	if !AlphaNumRegex.MatchString(metadata[3]) {
 		return Message{}, errors.New("incorrect metadata format, cannot parse compression")
 	}
 	decoded.Compression = metadata[3]
 
-	if !re.MatchString(metadata[4]) {
+	if !AlphaNumRegex.MatchString(metadata[4]) {
 		return Message{}, errors.New("incorrect metadata format, cannot parse encoding")
 	}
 	decoded.Encoding = metadata[4]
