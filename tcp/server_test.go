@@ -1,7 +1,6 @@
 package tcp
 
 import (
-	"fmt"
 	"net"
 	"reflect"
 	"strconv"
@@ -42,8 +41,6 @@ func TestTCP(t *testing.T) {
 	if err != nil {
 		t.Error("could not connect to TCP server: ", err)
 	}
-
-	fmt.Println(conn)
 
 	_, err = conn.Write([]byte("EWP 13.05 RPC blahblahblah json 16 14\nthis is a headerthis is a body"))
 	if err != nil {
