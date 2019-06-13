@@ -50,7 +50,7 @@ func TestUnmarshal_Successful(t *testing.T) {
 	for i, tt := range test {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			output, _ := Unmarshal(tt.message)
-			if !reflect.DeepEqual(output, tt.output) {
+			if !reflect.DeepEqual(*output, tt.output) {
 				t.Errorf("return value of Unmarshal does not match expected value")
 			}
 		})

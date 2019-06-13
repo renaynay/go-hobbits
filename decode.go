@@ -13,52 +13,52 @@ var VersionNumRegex = regexp.MustCompile(`^(\d+\.)(\d+)*$`)
 //TODO: check error messages
 
 // Unmarshal takes a string and parses it to return a hobbit message
-func Unmarshal(message string) (Message, error) {
+func Unmarshal(message string) (*Message, error) {
 	var decoded Message
 
 	lines := strings.Split(message, "\n")
 	if len(lines) != 2 {
-		return Message{}, errors.New("message request must contain 2 lines")
+		return nil, errors.New("message request must contain 2 lines")
 	}
 
 	metadata := strings.Split(lines[0], " ")
 	if len(metadata) != 7 {
-		return Message{}, errors.New("not all metadata provided")
+		return nil, errors.New("not all metadata provided")
 	}
 
 	if !VersionNumRegex.MatchString(metadata[1]) {
-		return Message{}, errors.New("EWP version cannot be parsed")
+		return nil, errors.New("EWP version cannot be parsed")
 	}
 	decoded.Version = metadata[1]
 
 	if metadata[2] != "RPC" && metadata[2] != "GOSSIP" {
-		return Message{}, errors.New("communication protocol unsupported")
+		return nil, errors.New("communication protocol unsupported")
 	}
 	decoded.Protocol = metadata[2]
 
 
 
 	if !AlphaNumRegex.MatchString(metadata[3]) {
-		return Message{}, errors.New("incorrect metadata format, cannot parse compression")
+		return nil, errors.New("incorrect metadata format, cannot parse compression")
 	}
 	decoded.Compression = metadata[3]
 
 	if !AlphaNumRegex.MatchString(metadata[4]) {
-		return Message{}, errors.New("incorrect metadata format, cannot parse encoding")
+		return nil, errors.New("incorrect metadata format, cannot parse encoding")
 	}
 	decoded.Encoding = metadata[4]
 
 	headLength, err := strconv.Atoi(metadata[5])
 	if err != nil {
-		return Message{}, errors.New("incorrect metadata format, cannot parse header-length")
+		return nil, errors.New("incorrect metadata format, cannot parse header-length")
 	}
 	decoded.Headers = []byte(lines[1][:headLength])
 
 	bodyLength, err := strconv.Atoi(metadata[6])
 	if err != nil {
-		return Message{}, errors.New("incorrect metadata format, cannot parse body-length")
+		return nil, errors.New("incorrect metadata format, cannot parse body-length")
 	}
 	decoded.Body = []byte(lines[1][headLength:headLength+bodyLength])
 
-	return decoded, nil
+	return &decoded, nil
 }
