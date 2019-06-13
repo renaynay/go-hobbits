@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// Unmarshal takes a hobbit message and encodes it to a string
+// Marshal takes a hobbit message and encodes it to a string
 func Marshal(message Message) (string, error) {
 	if message.Version == "" {
 		return "", errors.New("cannot marshal message, version not found")
