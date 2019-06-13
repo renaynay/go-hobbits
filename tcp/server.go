@@ -15,12 +15,12 @@ type Server struct {
 	port int
 }
 
-// Creates a new server
+// NewServer creates a new server
 func NewServer(host string, port int) *Server {
 	return &Server{host: host, port: port}
 }
 
-// Listens for incoming connections.
+// Listen listens for incoming connections.
 func (s *Server) Listen(callback func(net.Conn, encoding.Message)) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *Server) Listen(callback func(net.Conn, encoding.Message)) error {
 	}
 }
 
-// Handles incoming requests.
+// handle handles incoming requests.
 func (*Server) handle(conn net.Conn, callback func(net.Conn, encoding.Message)) error {
 	buf := make([]byte, 1024)
 
@@ -58,7 +58,7 @@ func (*Server) handle(conn net.Conn, callback func(net.Conn, encoding.Message)) 
 	return nil
 }
 
-// Sends an encoded message
+// SendMessage sends an encoded message
 func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
