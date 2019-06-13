@@ -1,39 +1,52 @@
-package tcp
+package tcp_test
 
 import (
+	"net"
 	"reflect"
-	"strconv"
 	"testing"
+	"time"
+
+	"github.com/renaynay/go-hobbits/encoding"
+	"github.com/renaynay/go-hobbits/tcp"
 )
 
-func TestNewServer(t *testing.T) {
-	var test = []struct {
-		host string
-		port int
-		server *Server
-	}{
-		{host: "test", port: 3333, server: &Server{host: "test", port: 3333}},
-		{host: "host", port: 4000, server: &Server{host: "host", port: 4000}},
+func TestTCP(t *testing.T) {
+	server := tcp.NewServer("127.0.0.1", 0)
+	ch := make(chan encoding.Message)
+
+	go server.Listen(func(_ net.Conn, message encoding.Message) {
+		ch <- message
+	})
+
+	for {
+		if server.Addr() != nil {
+			break
+		}
+
+		time.Sleep(1)
 	}
 
-	for i, tt := range test {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			server := NewServer(tt.host, tt.port)
-			if !reflect.DeepEqual(&server, &tt.server) {
-				t.Errorf("return value of NewServer does not match expected value")
-			}
-		})
+	conn, err := net.Dial("tcp", server.Addr().String())
+	if err != nil {
+		t.Error("could not connect to TCP server: ", err)
 	}
-}
 
-func TestServer_Listen(t *testing.T) {
+	_, err = conn.Write([]byte("EWP 13.05 RPC blahblahblah json 16 14\nthis is a headerthis is a body"))
+	if err != nil {
+		t.Error("could not write to the TCP server: ", err)
+	}
+	read := <-ch
 
-}
+	expected := encoding.Message{
+		Version:     "13.05",
+		Protocol:    "RPC",
+		Compression: "blahblahblah",
+		Encoding:    "json",
+		Headers:     []byte("this is a header"),
+		Body:        []byte("this is a body"),
+	}
 
-func TestServer_SendMessage(t *testing.T) {
-
-}
-
-func Test_send(t *testing.T) {
-
+	if !reflect.DeepEqual(expected, read) {
+		t.Error("return value from TCP server does not match expected value")
+	}
 }

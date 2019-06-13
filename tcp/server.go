@@ -3,8 +3,8 @@
 package tcp
 
 import (
-	"errors"
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/renaynay/go-hobbits/encoding"
@@ -16,6 +16,8 @@ type Callback func(net.Conn, encoding.Message)
 type Server struct {
 	host string
 	port int
+
+	addr net.Addr
 }
 
 // NewServer creates a new server
@@ -27,27 +29,36 @@ func NewServer(host string, port int) *Server {
 func (s *Server) Listen(c Callback) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error listening: %s", (err.Error())))
+		return fmt.Errorf("Error listening: %s", err.Error())
 	}
 	defer listen.Close()
+
+	s.addr = listen.Addr()
 
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
-			return err
+			log.Printf(err.Error())
 		}
 
-		go s.handle(conn, c)
+		go handle(conn, c)
 	}
 }
 
+func (s Server) Addr() net.Addr {
+	return s.addr
+}
+
 // handle handles incoming requests
-func (*Server) handle(conn net.Conn, c Callback) error {
-	buf := make([]byte, 1024) // TODO: do this better
+func handle(conn net.Conn, c Callback) error {
+	// TODO: find message size and store it in var. Wait til someone responds here: https://github.com/whiteblock/hobbits/issues/58#issuecomment-501883490
+	// TODO: if no one responds, write a script to find the message size
+
+	buf := make([]byte, 1024) // TODO: pass in message size here
 
 	_, err := conn.Read(buf)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error reading: %s", err.Error())) // TODO: clean up error
+		return fmt.Errorf("Error reading: %s", err.Error())
 	}
 
 	decoded, err := encoding.Unmarshal(string(buf))
@@ -61,18 +72,15 @@ func (*Server) handle(conn net.Conn, c Callback) error {
 }
 
 // SendMessage sends an encoded message
-func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
+func (*Server) SendMessage(conn net.Conn, message encoding.Message) error { //TODO: how can this be easier to use? does it need to operate on Server
+	defer conn.Close()
+
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
 		return err
 	}
 
 	_, err = conn.Write([]byte(encoded))
-	if err != nil {
-		return err
-	}
-
-	err = conn.Close()
 	if err != nil {
 		return err
 	}
