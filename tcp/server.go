@@ -23,7 +23,7 @@ func NewServer(host string, port int) *Server {
 	return &Server{host: host, port: port}
 }
 
-// Listen listens for incoming connections.
+// Listen listens for incoming connections
 func (s *Server) Listen(c Callback) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
@@ -41,7 +41,7 @@ func (s *Server) Listen(c Callback) error {
 	}
 }
 
-// handle handles incoming requests.
+// handle handles incoming requests
 func (*Server) handle(conn net.Conn, c Callback) error {
 	buf := make([]byte, 1024) // TODO: do this better
 
