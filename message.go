@@ -1,5 +1,11 @@
+// Package hobbits is a go implementation of Hobbits, a Lightweight,
+// Multiclient Wire Protocol For ETH2.0 Communications.
+//
+// By Rene Nayman
 package hobbits
 
+// Message represents a parsed Hobbits message.
+// See examples of unparsed and parsed messages here: https://github.com/deltap2p/hobbits/blob/master/specs/protocol.md
 type Message struct {
 	Version     string
 	Protocol    string

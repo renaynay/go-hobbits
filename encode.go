@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// Marshal takes a hobbit message and encodes it to a string
-func Marshal(message Message) (string, error) {
+// Marshal takes a parsed message and encodes it to a wire protocol message
+	func Marshal(message Message) (string, error) {
 	if message.Version == "" {
 		return "", errors.New("cannot marshal message, version not found")
 	}

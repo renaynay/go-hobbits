@@ -10,9 +10,7 @@ import (
 var AlphaNumRegex = regexp.MustCompile(`^[a-z0-9_]*$`)
 var VersionNumRegex = regexp.MustCompile(`^(\d+\.)(\d+)*$`)
 
-//TODO: check error messages
-
-// Unmarshal takes a string and parses it to return a hobbit message
+// Unmarshal takes a wire protocol message and parses it
 func Unmarshal(message string) (*Message, error) {
 	var decoded Message
 
