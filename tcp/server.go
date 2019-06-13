@@ -39,7 +39,7 @@ func handleRequest(conn net.Conn, callback func(net.Conn, encoding.Message)) err
 		return errors.New(fmt.Sprintf("Error reading: %s", err.Error()))
 	}
 
-	decoded, err := encoding.Unmarshal(string(buf)) // TODO: what do I do with the unmarshaled message? should it be left blank bc this is a framework ?
+	decoded, err := encoding.Unmarshal(string(buf))
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func handleRequest(conn net.Conn, callback func(net.Conn, encoding.Message)) err
 }
 
 // Sends an encoded message
-func SendMessage(conn net.Conn, message encoding.Message) error { // TODO: where does this get called?
+func SendMessage(conn net.Conn, message encoding.Message) error {
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
 		return err
