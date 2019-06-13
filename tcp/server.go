@@ -11,8 +11,8 @@ import (
 )
 
 // Listens for incoming connections.
-func Listen(connType string, connHost string, connPort string) error {
-	listen, err := net.Listen(connType, connHost+":"+connPort)
+func Listen(host string, port int, callback func(net.Conn, encoding.Message)) error {
+	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error listening: %s", (err.Error())))
 	}
@@ -24,42 +24,39 @@ func Listen(connType string, connHost string, connPort string) error {
 			return err
 		}
 
-		go handleRequest(conn)
+		go handleRequest(conn, callback)
 	}
 
 	return nil
 }
 
 // Handles incoming requests.
-func handleRequest(conn net.Conn) error {
-	// Make a buffer to hold incoming data.
+func handleRequest(conn net.Conn, callback func(net.Conn, encoding.Message)) error {
 	buf := make([]byte, 1024)
-	// Read the incoming connection into the buffer.
+
 	_, err := conn.Read(buf)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error reading: %s", err.Error()))
 	}
 
-	// Decodes data
-	_, err = encoding.Unmarshal(string(buf)) // TODO: what do I do with the unmarshaled message? should it be left blank bc this is a framework ?
+	decoded, err := encoding.Unmarshal(string(buf)) // TODO: what do I do with the unmarshaled message? should it be left blank bc this is a framework ?
 	if err != nil {
 		return err
 	}
+
+	go callback(conn, *decoded)
 
 	return nil
 }
 
 // Sends an encoded message
 func SendMessage(conn net.Conn, message encoding.Message) error { // TODO: where does this get called?
-	// Encodes the message
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
 		return err
 	}
 
-	// Send a response back to person contacting us.
 	conn.Write([]byte(encoded))
-	// Close the connection when you're done with it.
 	conn.Close()
 
 	return nil
