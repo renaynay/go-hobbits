@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-var alphaNumRegex = regexp.MustCompile(`^[a-z0-9_]*$`)
 var versionNumRegex = regexp.MustCompile(`^(\d+\.)(\d+)*$`)
 
 // Unmarshal takes a wire protocol message and parses it
@@ -24,7 +23,7 @@ func Unmarshal(message string) (*Message, error) {
 	}
 
 	metadata := strings.Split(lines[0], " ")
-	if len(metadata) != 7 {
+	if len(metadata) != 5 {
 		return nil, errors.New("not all metadata provided")
 	}
 
@@ -38,25 +37,13 @@ func Unmarshal(message string) (*Message, error) {
 	}
 	decoded.Protocol = metadata[2]
 
-
-
-	if !alphaNumRegex.MatchString(metadata[3]) {
-		return nil, errors.New("incorrect metadata format, cannot parse compression")
-	}
-	decoded.Compression = metadata[3]
-
-	if !alphaNumRegex.MatchString(metadata[4]) {
-		return nil, errors.New("incorrect metadata format, cannot parse encoding")
-	}
-	decoded.Encoding = metadata[4]
-
-	headLength, err := strconv.Atoi(metadata[5])
+	headLength, err := strconv.Atoi(metadata[3])
 	if err != nil {
 		return nil, errors.New("incorrect metadata format, cannot parse header-length")
 	}
-	decoded.Headers = []byte(lines[1][:headLength])
+	decoded.Header = []byte(lines[1][:headLength])
 
-	bodyLength, err := strconv.Atoi(metadata[6])
+	bodyLength, err := strconv.Atoi(metadata[4])
 	if err != nil {
 		return nil, errors.New("incorrect metadata format, cannot parse body-length")
 	}
