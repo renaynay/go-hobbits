@@ -13,35 +13,29 @@ func TestUnmarshal_Successful(t *testing.T) {
 		output  Message
 	}{
 		{
-			message: "EWP 13.05 RPC blahblahblah json 16 14\nthis is a headerthis is a body",
+			message: "EWP 13.05 RPC 16 14\nthis is a headerthis is a body",
 			output: Message{
 				Version:     "13.05",
 				Protocol:    "RPC",
-				Compression: "blahblahblah",
-				Encoding:    "json",
-				Headers:     []byte("this is a header"),
+				Header:     []byte("this is a header"),
 				Body:        []byte("this is a body"),
 			},
 		},
 		{
-			message: "EWP 13.05 GOSSIP blahblahb123_f bson 7 12\ntestingtesting body",
+			message: "EWP 13.05 GOSSIP 7 12\ntestingtesting body",
 			output: Message{
 				Version:     "13.05",
 				Protocol:    "GOSSIP",
-				Compression: "blahblahb123_f",
-				Encoding:    "bson",
-				Headers:     []byte("testing"),
+				Header:     []byte("testing"),
 				Body:        []byte("testing body"),
 			},
 		},
 		{
-			message: "EWP 1230329483.05392489 RPC blahblahblah json 4 4\ntesttest",
+			message: "EWP 1230329483.05392489 RPC 4 4\ntesttest",
 			output: Message{
 				Version:     "1230329483.05392489",
 				Protocol:    "RPC",
-				Compression: "blahblahblah",
-				Encoding:    "json",
-				Headers:     []byte("test"),
+				Header:     []byte("test"),
 				Body:        []byte("test"),
 			},
 		},
@@ -67,31 +61,23 @@ func TestUnmarshal_Unsuccessful(t *testing.T) {
 			err:     errors.New("message request must contain 2 lines"),
 		},
 		{
-			message: "EWP 13.05 bson 7 12\ntestingtesting body",
+			message: "EWP 13.05 7 12\ntestingtesting body",
 			err:     errors.New("not all metadata provided"),
 		},
 		{
-			message: "EWP 123032948392489 RPC blahblahblah json 4 4\ntesttest",
+			message: "EWP 123032948392489 RPC 4 4\ntesttest",
 			err:     errors.New("EWP version cannot be parsed"),
 		},
 		{
-			message: "EWP 123032948.392489 notrpc blahblahblah json 4 4\ntesttest",
+			message: "EWP 123032948.392489 notrpc 4 4\ntesttest",
 			err:     errors.New("communication protocol unsupported"),
 		},
 		{
-			message: "EWP 123032948.392489 GOSSIP blah~ json 4 4\ntesttest",
-			err:     errors.New("incorrect metadata format, cannot parse compression"),
-		},
-		{
-			message: "EWP 123032948.392489 GOSSIP blah JSON 4 4\ntesttest",
-			err:     errors.New("incorrect metadata format, cannot parse encoding"),
-		},
-		{
-			message: "EWP 123032948.392489 GOSSIP blah json f 4\ntesttest",
+			message: "EWP 123032948.392489 GOSSIP f 4\ntesttest",
 			err:     errors.New("incorrect metadata format, cannot parse header-length"),
 		},
 		{
-			message: "EWP 123032948.392489 GOSSIP blah json 4 f\ntesttest",
+			message: "EWP 123032948.392489 GOSSIP 4 f\ntesttest",
 			err:     errors.New("incorrect metadata format, cannot parse body-length"),
 		},
 	}

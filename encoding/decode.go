@@ -38,13 +38,13 @@ func Unmarshal(message string) (*Message, error) {
 	}
 	decoded.Protocol = metadata[2]
 
-	headLength, err := strconv.Atoi(metadata[5])
+	headLength, err := strconv.Atoi(metadata[3])
 	if err != nil {
 		return nil, errors.New("incorrect metadata format, cannot parse header-length")
 	}
 	decoded.Header = []byte(lines[1][:headLength])
 
-	bodyLength, err := strconv.Atoi(metadata[6])
+	bodyLength, err := strconv.Atoi(metadata[4])
 	if err != nil {
 		return nil, errors.New("incorrect metadata format, cannot parse body-length")
 	}
