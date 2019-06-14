@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-var alphaNumRegex = regexp.MustCompile(`^[a-z0-9_]*$`)
 var versionNumRegex = regexp.MustCompile(`^(\d+\.)(\d+)*$`)
 
 // Unmarshal takes a wire protocol message and parses it
