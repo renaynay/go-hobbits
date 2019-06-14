@@ -7,10 +7,8 @@ package encoding
 // Message represents a parsed Hobbits message.
 // See examples of unparsed and parsed messages here: https://github.com/deltap2p/hobbits/blob/master/specs/protocol.md
 type Message struct {
-	Version     string
-	Protocol    string
-	Compression string
-	Encoding    string
-	Headers     []byte
-	Body        []byte
+	Version  string
+	Protocol string
+	Header   []byte
+	Body     []byte
 }
