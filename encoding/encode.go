@@ -15,23 +15,13 @@ import (
 		return "", errors.New("cannot marshal message, protocol not found")
 	}
 
-	if message.Compression == "" {
-		return "", errors.New("cannot marshal message, compression not found")
-	}
-
-	if message.Encoding == "" {
-		return "", errors.New("cannot marshal message, encoding not found")
-	}
-
 	return fmt.Sprintf(
-		"EWP %s %s %s %s %d %d\n%s%s",
+		"EWP %s %s %d %d\n%s%s",
 		message.Version,
 		message.Protocol,
-		message.Compression,
-		message.Encoding,
-		len(string(message.Headers)),
+		len(string(message.Header)),
 		len(string(message.Body)),
-		string(message.Headers),
+		string(message.Header),
 		string(message.Body),
 	), nil
 }
