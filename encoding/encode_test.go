@@ -1,19 +1,21 @@
-package encoding
+package encoding_test
 
 import (
 	"errors"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/renaynay/go-hobbits/encoding"
 )
 
 func TestMarshal_Successful(t *testing.T) {
 	var test = []struct {
-		encoded Message
+		encoded encoding.Message
 		message string
 	}{
 		{
-			encoded: Message{
+			encoded: encoding.Message{
 				Version:     "13.05",
 				Protocol:    "RPC",
 				Header:     []byte("this is a header"),
@@ -22,7 +24,7 @@ func TestMarshal_Successful(t *testing.T) {
 			message: "EWP 13.05 RPC 16 14\nthis is a headerthis is a body",
 		},
 		{
-			encoded: Message{
+			encoded: encoding.Message{
 				Version:     "13.05",
 				Protocol:    "GOSSIP",
 				Header:     []byte("testing"),
@@ -31,7 +33,7 @@ func TestMarshal_Successful(t *testing.T) {
 			message: "EWP 13.05 GOSSIP 7 12\ntestingtesting body",
 		},
 		{
-			encoded: Message{
+			encoded: encoding.Message{
 				Version:     "1230329483.05392489",
 				Protocol:    "RPC",
 				Header:     []byte("test"),
@@ -43,7 +45,7 @@ func TestMarshal_Successful(t *testing.T) {
 
 	for i, tt := range test {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			string, _ := Marshal(tt.encoded)
+			string, _ := encoding.Marshal(tt.encoded)
 			if !reflect.DeepEqual(string, tt.message) {
 				t.Errorf("return value of Marshal did not match expected value. wanted: %v, got: %v", tt.message, string)
 			}
@@ -53,11 +55,11 @@ func TestMarshal_Successful(t *testing.T) {
 
 func TestMarshal_Unsuccessful(t *testing.T) {
 	var test = []struct {
-		encoded Message
+		encoded encoding.Message
 		err     error
 	}{
 		{
-			encoded: Message{
+			encoded: encoding.Message{
 				Version:     "",
 				Protocol:    "RPC",
 				Header:     []byte("this is a header"),
@@ -66,7 +68,7 @@ func TestMarshal_Unsuccessful(t *testing.T) {
 			err: errors.New("cannot marshal message, version not found"),
 		},
 		{
-			encoded: Message{
+			encoded: encoding.Message{
 				Version:     "1230329483.05392489",
 				Protocol:    "",
 				Header:     []byte("test"),
@@ -78,10 +80,24 @@ func TestMarshal_Unsuccessful(t *testing.T) {
 
 	for i, tt := range test {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := Marshal(tt.encoded)
+			_, err := encoding.Marshal(tt.encoded)
 			if !reflect.DeepEqual(err, tt.err) {
 				t.Errorf("return value of Marshal did not match expected value")
 			}
 		})
+	}
+}
+
+
+func BenchmarkMarshal(b *testing.B) {
+	message := encoding.Message{
+		Version: "13.5",
+		Protocol: "RPC",
+		Header: []byte("this is a header"),
+		Body: []byte("this is a body"),
+	}
+
+	for i := 0; i <= b.N; i++ {
+		encoding.Marshal(message)
 	}
 }
