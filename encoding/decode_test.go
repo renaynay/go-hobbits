@@ -91,3 +91,9 @@ func TestUnmarshal_Unsuccessful(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkUnmarshal(b *testing.B) {
+	for i := 0; i <= b.N; i++ {
+		Unmarshal("EWP 13.05 RPC 16 14\nthis is a headerthis is a body")
+	}
+}

@@ -1,4 +1,3 @@
-
 // TODO: implement go fuzz
 // TODO: implement mutation testing: https://github.com/zimmski/go-mutesting
 

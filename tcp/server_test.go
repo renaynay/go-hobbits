@@ -38,10 +38,10 @@ func TestTCP(t *testing.T) {
 	read := <-ch
 
 	expected := encoding.Message{
-		Version:     "13.05",
-		Protocol:    "RPC",
-		Header:     []byte("this is a header"),
-		Body:        []byte("this is a body"),
+		Version:  "13.05",
+		Protocol: "RPC",
+		Header:   []byte("this is a header"),
+		Body:     []byte("this is a body"),
 	}
 
 	if !reflect.DeepEqual(expected, read) {
