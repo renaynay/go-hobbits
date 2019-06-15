@@ -15,6 +15,35 @@ go get github.com/renaynay/go-hobbits
 
 ## Usage
 
+Encode a message: 
+
+```go
+var message encoding.Message{
+	Version: "0.0",
+	Protocol: "RPC",
+	Header: []byte("test header"),
+	Body: []byte("test body"),
+}
+
+encoded, err := encoding.Marshal(message)
+if err != nil {
+	log.Print(err)
+}
+
+fmt.Println(encoded)
+```
+
+Decode a message:
+
+```go
+decoded, err := encoding.Unmarshal("EWP 13.05 RPC 16 14\nthis is a headerthis is a body")
+if err != nil {
+	log.Print(err)
+}
+
+fmt.Println(decoded)
+```
+
 Here is a demo echo server: 
 
 ```go
