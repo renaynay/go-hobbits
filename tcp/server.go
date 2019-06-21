@@ -42,7 +42,7 @@ func (s *Server) Listen(c Callback) error {
 		}
 
 		go func() {
-			err := handle(conn, c)
+			err := s.handle(conn, c)
 			if err != nil {
 				log.Print(err)
 			}
@@ -55,7 +55,7 @@ func (s Server) Addr() net.Addr {
 }
 
 // handle handles incoming requests
-func handle(conn net.Conn, c Callback) error {
+func (s *Server) handle(conn net.Conn, c Callback) error {
 	// TODO: find message size and store it in var. Wait til someone responds here: https://github.com/whiteblock/hobbits/issues/58#issuecomment-501883490
 	// TODO: if no one responds, write a script to find the message size
 
@@ -69,6 +69,17 @@ func handle(conn net.Conn, c Callback) error {
 	decoded, err := encoding.Unmarshal(string(buf))
 	if err != nil {
 		return err
+	}
+
+	if decoded.Protocol == "PING" {
+		decoded.Header = []byte("pong")
+
+		err := s.SendMessage(conn, *decoded)
+		if err !=  nil {
+			return fmt.Errorf("PONG could not be sent: %s", err.Error())
+		}
+
+		return nil
 	}
 
 	go c(conn, *decoded)
