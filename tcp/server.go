@@ -38,10 +38,15 @@ func (s *Server) Listen(c Callback) error {
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
-			log.Printf(err.Error())
+			return err
 		}
 
-		go handle(conn, c)
+		go func() {
+			err := handle(conn, c)
+			if err != nil {
+				log.Print(err)
+			}
+		}()
 	}
 }
 
@@ -72,7 +77,7 @@ func handle(conn net.Conn, c Callback) error {
 }
 
 // SendMessage sends an encoded message
-func (*Server) SendMessage(conn net.Conn, message encoding.Message) error { //TODO: how can this be easier to use? does it need to operate on Server
+func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 	defer conn.Close()
 
 	encoded, err := encoding.Marshal(message)

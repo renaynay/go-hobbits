@@ -1,6 +1,8 @@
 package tcp_test
 
 import (
+	"io/ioutil"
+	"log"
 	"net"
 	"reflect"
 	"testing"
@@ -9,6 +11,11 @@ import (
 	"github.com/renaynay/go-hobbits/encoding"
 	"github.com/renaynay/go-hobbits/tcp"
 )
+
+func TestMain(m *testing.M) {
+	log.SetOutput(ioutil.Discard)
+	m.Run()
+}
 
 func TestTCP(t *testing.T) {
 	server := tcp.NewServer("127.0.0.1", 0)
