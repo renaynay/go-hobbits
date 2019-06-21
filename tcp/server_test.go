@@ -38,7 +38,7 @@ func TestTCP(t *testing.T) {
 		t.Error("could not connect to TCP server: ", err)
 	}
 
-	_, err = conn.Write([]byte("EWP 13.05 PING 16 14\nthis is a headerthis is a body"))
+	_, err = conn.Write([]byte("EWP 13.05 RPC 16 14\nthis is a headerthis is a body"))
 	if err != nil {
 		t.Error("could not write to the TCP server: ", err)
 	}
@@ -46,8 +46,8 @@ func TestTCP(t *testing.T) {
 
 	expected := encoding.Message{
 		Version:  "13.05",
-		Protocol: "PING",
-		Header:   []byte("pong"),
+		Protocol: "RPC",
+		Header:   []byte("this is a header"),
 		Body:     []byte("this is a body"),
 	}
 
