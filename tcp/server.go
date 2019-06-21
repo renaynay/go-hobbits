@@ -26,10 +26,10 @@ func NewServer(host string, port int) *Server {
 }
 
 // Listen listens for incoming connections
-func (s *Server) Listen(c Callback) {
+func (s *Server) Listen(c Callback) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
-		log.Printf("Error listening: %s", err.Error())
+		return fmt.Errorf("Error listening: %s", err.Error())
 	}
 	defer listen.Close()
 
@@ -38,10 +38,15 @@ func (s *Server) Listen(c Callback) {
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
-			log.Printf(err.Error())
+			return fmt.Errorf(err.Error())
 		}
 
-		go handle(conn, c)
+		go func() {
+			err := handle(conn, c)
+			if err != nil {
+				log.Print(err)
+			}
+		}()
 	}
 }
 
@@ -50,7 +55,7 @@ func (s Server) Addr() net.Addr {
 }
 
 // handle handles incoming requests
-func handle(conn net.Conn, c Callback) {
+func handle(conn net.Conn, c Callback) error {
 	// TODO: find message size and store it in var. Wait til someone responds here: https://github.com/whiteblock/hobbits/issues/58#issuecomment-501883490
 	// TODO: if no one responds, write a script to find the message size
 
@@ -58,28 +63,32 @@ func handle(conn net.Conn, c Callback) {
 
 	_, err := conn.Read(buf)
 	if err != nil {
-		log.Printf("Error reading: %s", err.Error())
+		return fmt.Errorf("Error reading: %s", err.Error())
 	}
 
 	decoded, err := encoding.Unmarshal(string(buf))
 	if err != nil {
-		log.Print(err)
+		return err
 	}
 
 	go c(conn, *decoded)
+
+	return nil
 }
 
 // SendMessage sends an encoded message
-func (*Server) SendMessage(conn net.Conn, message encoding.Message) { //TODO: how can this be easier to use? does it need to operate on Server
+func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 	defer conn.Close()
 
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
-		log.Print(err)
+		return err
 	}
 
 	_, err = conn.Write([]byte(encoded))
 	if err != nil {
-		log.Print(err)
+		return err
 	}
+
+	return nil
 }
