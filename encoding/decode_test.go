@@ -41,6 +41,15 @@ func TestUnmarshal_Successful(t *testing.T) {
 				Body:        []byte("test"),
 			},
 		},
+		{
+			message: "EWP 1230329483.05392489 PING 4 4\ntesttest",
+			output: encoding.Message{
+				Version:     "1230329483.05392489",
+				Protocol:    "PING",
+				Header:     []byte("test"),
+				Body:        []byte("test"),
+			},
+		},
 	}
 
 	for i, tt := range test {

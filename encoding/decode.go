@@ -31,7 +31,7 @@ func Unmarshal(message string) (*Message, error) {
 	}
 	decoded.Version = metadata[1]
 
-	if metadata[2] != "RPC" && metadata[2] != "GOSSIP" {
+	if metadata[2] != "RPC" && metadata[2] != "GOSSIP" && metadata[2] != "PING" {
 		return nil, errors.New("communication protocol unsupported")
 	}
 	decoded.Protocol = metadata[2]
