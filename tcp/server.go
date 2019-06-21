@@ -38,7 +38,7 @@ func (s *Server) Listen(c Callback) error {
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
-			return fmt.Errorf(err.Error())
+			return err
 		}
 
 		go func() {
