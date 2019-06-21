@@ -4,14 +4,6 @@
 // By Rene Nayman
 package encoding
 
-type Protocol string
-
-const (
-	RPC = "RPC"
-	GOSSIP = "GOSSIP"
-	PING  = "PING"
-)
-
 // Message represents a parsed Hobbits message.
 // See examples of unparsed and parsed messages here: https://github.com/deltap2p/hobbits/blob/master/specs/protocol.md
 type Message struct {
