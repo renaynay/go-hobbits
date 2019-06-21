@@ -75,7 +75,7 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 		decoded.Header = []byte("pong")
 
 		err := s.SendMessage(conn, *decoded)
-		if err !=  nil {
+		if err != nil {
 			return fmt.Errorf("PONG could not be sent: %s", err.Error())
 		}
 

@@ -7,9 +7,9 @@ package encoding
 type Protocol string
 
 const (
-	RPC Protocol = "RPC"
+	RPC    Protocol = "RPC"
 	GOSSIP Protocol = "GOSSIP"
-	PING Protocol = "PING"
+	PING   Protocol = "PING"
 )
 
 // Message represents a parsed Hobbits message.
