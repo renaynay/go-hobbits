@@ -60,8 +60,7 @@ func TestPING(t *testing.T) {
 	server := tcp.NewServer("127.0.0.1", 0)
 	ch := make(chan string)
 
-	go server.Listen(func(_ net.Conn, message encoding.Message) {
-	})
+	go server.Listen(func(_ net.Conn, message encoding.Message) { })
 
 	for {
 		if server.Addr() != nil {
