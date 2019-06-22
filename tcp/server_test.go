@@ -93,7 +93,7 @@ func TestPING(t *testing.T) {
 	readFromCh := <-ch
 	expected := "EWP 13.05 PING 4 14\npongthis is a body"
 
-	if !reflect.DeepEqual(readFromCh, expected) {
+	if readFromCh != expected {
 		t.Error("server does not send the correct default pong response to ping")
 	}
 }
