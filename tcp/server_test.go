@@ -1,3 +1,5 @@
+// TODO: FINISH TEST FOR PING
+
 package tcp_test
 
 import (
@@ -46,7 +48,7 @@ func TestTCP(t *testing.T) {
 
 	expected := encoding.Message{
 		Version:  "13.05",
-		Protocol: "RPC",
+		Protocol: encoding.RPC,
 		Header:   []byte("this is a header"),
 		Body:     []byte("this is a body"),
 	}
@@ -54,4 +56,8 @@ func TestTCP(t *testing.T) {
 	if !reflect.DeepEqual(expected, read) {
 		t.Errorf("return value from TCP server does not match expected value. want=%v, got=%v", expected, read)
 	}
+}
+
+func TestPING(t *testing.T) {
+
 }

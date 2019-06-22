@@ -18,7 +18,7 @@ func TestUnmarshal_Successful(t *testing.T) {
 			message: "EWP 13.05 RPC 16 14\nthis is a headerthis is a body",
 			output: encoding.Message{
 				Version:  "13.05",
-				Protocol: "RPC",
+				Protocol: encoding.RPC,
 				Header:   []byte("this is a header"),
 				Body:     []byte("this is a body"),
 			},
@@ -27,7 +27,7 @@ func TestUnmarshal_Successful(t *testing.T) {
 			message: "EWP 13.05 GOSSIP 7 12\ntestingtesting body",
 			output: encoding.Message{
 				Version:  "13.05",
-				Protocol: "GOSSIP",
+				Protocol: encoding.GOSSIP,
 				Header:   []byte("testing"),
 				Body:     []byte("testing body"),
 			},
@@ -36,7 +36,7 @@ func TestUnmarshal_Successful(t *testing.T) {
 			message: "EWP 1230329483.05392489 RPC 4 4\ntesttest",
 			output: encoding.Message{
 				Version:  "1230329483.05392489",
-				Protocol: "RPC",
+				Protocol: encoding.RPC,
 				Header:   []byte("test"),
 				Body:     []byte("test"),
 			},

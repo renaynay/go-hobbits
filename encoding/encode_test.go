@@ -17,7 +17,7 @@ func TestMarshal_Successful(t *testing.T) {
 		{
 			encoded: encoding.Message{
 				Version:     "13.05",
-				Protocol:    "RPC",
+				Protocol:    encoding.RPC,
 				Header:     []byte("this is a header"),
 				Body:        []byte("this is a body"),
 			},
@@ -26,7 +26,7 @@ func TestMarshal_Successful(t *testing.T) {
 		{
 			encoded: encoding.Message{
 				Version:     "13.05",
-				Protocol:    "GOSSIP",
+				Protocol:    encoding.GOSSIP,
 				Header:     []byte("testing"),
 				Body:        []byte("testing body"),
 			},
@@ -35,7 +35,7 @@ func TestMarshal_Successful(t *testing.T) {
 		{
 			encoded: encoding.Message{
 				Version:     "1230329483.05392489",
-				Protocol:    "RPC",
+				Protocol:    encoding.RPC,
 				Header:     []byte("test"),
 				Body:        []byte("test"),
 			},
