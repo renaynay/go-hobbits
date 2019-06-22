@@ -1,5 +1,3 @@
-// TODO: FINISH TEST FOR PING
-
 package tcp_test
 
 import (
@@ -59,5 +57,43 @@ func TestTCP(t *testing.T) {
 }
 
 func TestPING(t *testing.T) {
+	server := tcp.NewServer("127.0.0.1", 0)
+	ch := make(chan string)
 
+	go server.Listen(func(_ net.Conn, message encoding.Message) {
+	})
+
+	for {
+		if server.Addr() != nil {
+			break
+		}
+
+		time.Sleep(1)
+	}
+
+	conn, err := net.Dial("tcp", server.Addr().String())
+	if err != nil {
+		t.Error("could not connect to TCP server: ", err)
+	}
+
+	go func() {
+		read, err := ioutil.ReadAll(conn)
+		if err != nil {
+			t.Error(err)
+		}
+
+		ch <- string(read)
+	}()
+
+	_, err = conn.Write([]byte("EWP 13.05 PING 4 14\npingthis is a body"))
+	if err != nil {
+		t.Error("could not write to the TCP server: ", err)
+	}
+
+	readFromCh := <-ch
+	expected := "EWP 13.05 PING 4 14\npongthis is a body"
+
+	if !reflect.DeepEqual(readFromCh, expected) {
+		t.Error("server does not send the correct default pong response to ping")
+	}
 }
