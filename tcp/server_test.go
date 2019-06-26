@@ -96,3 +96,42 @@ func TestPING(t *testing.T) {
 		t.Error("server does not send the correct default pong response to ping")
 	}
 }
+
+func TestLongBody(t *testing.T) {
+	server := tcp.NewServer("127.0.0.1", 0)
+	ch := make(chan encoding.Message)
+
+	go server.Listen(func(_ net.Conn, message encoding.Message) {
+		ch <- message
+	})
+
+	for {
+		if server.Addr() != nil {
+			break
+		}
+
+		time.Sleep(1)
+	}
+
+	conn, err := net.Dial("tcp", server.Addr().String())
+	if err != nil {
+		t.Error("could not connect to TCP server: ", err)
+	}
+
+	_, err = conn.Write([]byte("EWP 13.05 RPC 16 2859\nthis is a headerthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofijspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfj"))
+	if err != nil {
+		t.Error("could not write to the TCP server: ", err)
+	}
+	read := <-ch
+
+	expected := encoding.Message{
+		Version:  "13.05",
+		Protocol: encoding.RPC,
+		Header:   []byte("this is a header"),
+		Body:     []byte("this is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofijspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfj"),
+	}
+
+	if !reflect.DeepEqual(expected, read) {
+		t.Errorf("return value from TCP server does not match expected value. want=%v, got=%v", expected, read)
+	}
+}
