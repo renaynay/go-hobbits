@@ -47,6 +47,7 @@ func (s *Server) Listen(c Callback) error {
 		go func() {
 			err := s.handle(conn, c)
 			if err != nil {
+				conn.Close()
 				log.Print(err)
 			}
 		}()
@@ -59,58 +60,56 @@ func (s Server) Addr() net.Addr {
 
 // handle handles incoming requests
 func (s *Server) handle(conn net.Conn, c Callback) error {
-	pktLen := make([]byte, 4)
+	for {
+		pktLen := make([]byte, 4)
 
-	_, err := conn.Read(pktLen)
-	if err != nil {
-		return errors.Wrap(err, "error reading length")
-	}
-
-	packetLength := binary.BigEndian.Uint32(pktLen)
-
-	buf := make([]byte, packetLength)
-
-	_, err = io.ReadFull(conn, buf)
-	if err != nil {
-		return errors.Wrap(err, "error reading packet")
-	}
-
-	decoded, err := encoding.Unmarshal(string(buf))
-	if err != nil {
-		return err
-	}
-
-	if decoded.Protocol == "PING" {
-		decoded.Header = []byte("pong")
-
-		err := s.SendMessage(conn, *decoded)
+		_, err := conn.Read(pktLen)
 		if err != nil {
-			return errors.Wrap(err, "PONG could not be sent")
+			return errors.Wrap(err, "error reading length")
 		}
 
-		return nil
+		length := binary.BigEndian.Uint32(pktLen)
+
+		buf := make([]byte, length)
+
+		_, err = io.ReadFull(conn, buf)
+		if err != nil {
+			return errors.Wrap(err, "error reading packet")
+		}
+
+		decoded, err := encoding.Unmarshal(string(buf))
+		if err != nil {
+			return err
+		}
+
+		if decoded.Protocol == "PING" {
+			decoded.Header = []byte("pong")
+
+			err := s.SendMessage(conn, *decoded)
+			if err != nil {
+				return errors.Wrap(err, "PONG could not be sent")
+			}
+
+			return nil
+		}
+
+		go c(conn, *decoded)
 	}
-
-	go c(conn, *decoded)
-
-	return nil
 }
 
 // SendMessage sends an encoded message
 func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
-	defer conn.Close()
-
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
 		return err
 	}
 
 	wireMsg := []byte(encoded)
-	packet := make([]byte, 4)
+	packetLength := make([]byte, 4)
 
-	binary.BigEndian.PutUint32(packet[0:], uint32(len(wireMsg)))
+	binary.BigEndian.PutUint32(packetLength[0:], uint32(len(wireMsg)))
 
-	packet := append(packet, wireMsg...)
+	packet := append(packetLength, wireMsg...)
 
 	_, err = conn.Write(packet)
 	if err != nil {
