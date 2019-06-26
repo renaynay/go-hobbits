@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-
 	"github.com/pkg/errors"
 	"github.com/renaynay/go-hobbits/encoding"
 )
