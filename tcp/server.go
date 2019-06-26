@@ -4,8 +4,11 @@ package tcp
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"encoding/binary"
+
 	"github.com/pkg/errors"
 	"github.com/renaynay/go-hobbits/encoding"
 )
@@ -56,12 +59,23 @@ func (s Server) Addr() net.Addr {
 
 // handle handles incoming requests
 func (s *Server) handle(conn net.Conn, c Callback) error {
-	read, err := read(conn)
+	pktLen := make([]byte, 4)
+
+	_, err := conn.Read(pktLen)
 	if err != nil {
-		return errors.Wrap(err, "error reading")
+		return errors.Wrap(err, "error reading length")
 	}
 
-	decoded, err := encoding.Unmarshal(string(read))
+	packetLength := binary.BigEndian.Uint32(pktLen)
+
+	buf := make([]byte, packetLength)
+
+	_, err = io.ReadFull(conn, buf)
+	if err != nil {
+		return errors.Wrap(err, "error reading packet")
+	}
+
+	decoded, err := encoding.Unmarshal(string(buf))
 	if err != nil {
 		return err
 	}
@@ -80,28 +94,6 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 	go c(conn, *decoded)
 
 	return nil
-}
-
-func read(conn net.Conn) ([]byte, error){
-	store := make([]byte, 0)
-	bufLength := 1024
-
-	for {
-		buf := make([]byte, bufLength)
-
-		bytesRead, err := conn.Read(buf)
-		if err != nil {
-			return nil, errors.Wrap(err, "error reading")
-		}
-
-		store = append(store, buf...)
-
-		if bytesRead != bufLength {
-			break
-		}
-	}
-
-	return store, nil
 }
 
 // SendMessage sends an encoded message
