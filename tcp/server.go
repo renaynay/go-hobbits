@@ -79,7 +79,7 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 				return errors.Wrap(err, "PONG could not be sent")
 			}
 
-			return nil
+			continue
 		}
 
 		go c(conn, *decoded)
