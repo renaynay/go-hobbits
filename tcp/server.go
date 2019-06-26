@@ -105,15 +105,14 @@ func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 		return err
 	}
 
-	packet := []byte(encoded)
-	packetLength := len(encoded)
-	pktLen := make([]byte, 4)
+	wireMsg := []byte(encoded)
+	packetLength := make([]byte, 4)
 
-	binary.BigEndian.PutUint32(pktLen[0:], uint32(packetLength))
+	binary.BigEndian.PutUint32(packetLength[0:], uint32(len(wireMsg)))
 
-	pktLen = append(pktLen, packet...)
+	packet := append(packetLength, wireMsg...)
 
-	_, err = conn.Write([]byte(pktLen))
+	_, err = conn.Write(packet)
 	if err != nil {
 		return err
 	}
