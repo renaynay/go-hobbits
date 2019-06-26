@@ -40,7 +40,7 @@ func TestTCP(t *testing.T) {
 		t.Error("could not connect to TCP server: ", err)
 	}
 
-	msg := getLength("EWP 13.05 RPC 16 14\nthis is a headerthis is a body")
+	msg := createPacket("EWP 13.05 RPC 16 14\nthis is a headerthis is a body")
 
 	_, err = conn.Write(msg)
 	if err != nil {
@@ -88,7 +88,7 @@ func TestPING(t *testing.T) {
 		ch <- string(read)
 	}()
 
-	msg := getLength("EWP 13.05 PING 4 14\npingthis is a body")
+	msg := createPacket("EWP 13.05 PING 4 14\npingthis is a body")
 
 	_, err = conn.Write(msg)
 	if err != nil {
@@ -126,7 +126,7 @@ func TestLongBody(t *testing.T) {
 
 	longBody := "this is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofijspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfj"
 
-	msg := getLength(fmt.Sprintf("EWP 13.05 RPC 16 2859\nthis is a header%s", longBody))
+	msg := createPacket(fmt.Sprintf("EWP 13.05 RPC 16 2859\nthis is a header%s", longBody))
 
 	_, err = conn.Write(msg)
 	if err != nil {
@@ -146,7 +146,7 @@ func TestLongBody(t *testing.T) {
 	}
 }
 
-func getLength(message string) []byte {
+func createPacket(message string) []byte {
 	msg := []byte(message)
 
 	length := make([]byte, 4)
