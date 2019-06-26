@@ -1,6 +1,7 @@
 package tcp_test
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -39,7 +40,9 @@ func TestTCP(t *testing.T) {
 		t.Error("could not connect to TCP server: ", err)
 	}
 
-	_, err = conn.Write([]byte("EWP 13.05 RPC 16 14\nthis is a headerthis is a body"))
+	msg := getLength("EWP 13.05 RPC 16 14\nthis is a headerthis is a body")
+
+	_, err = conn.Write(msg)
 	if err != nil {
 		t.Error("could not write to the TCP server: ", err)
 	}
@@ -61,7 +64,7 @@ func TestPING(t *testing.T) {
 	server := tcp.NewServer("127.0.0.1", 0)
 	ch := make(chan string)
 
-	go server.Listen(func(_ net.Conn, message encoding.Message) { })
+	go server.Listen(func(_ net.Conn, message encoding.Message) {})
 
 	for {
 		if server.Addr() != nil {
@@ -77,7 +80,7 @@ func TestPING(t *testing.T) {
 	}
 
 	go func() {
-		read, err := ioutil.ReadAll(conn)
+		read, err := tcp.Read(conn)
 		if err != nil {
 			t.Error(err)
 		}
@@ -85,7 +88,9 @@ func TestPING(t *testing.T) {
 		ch <- string(read)
 	}()
 
-	_, err = conn.Write([]byte("EWP 13.05 PING 4 14\npingthis is a body"))
+	msg := getLength("EWP 13.05 PING 4 14\npingthis is a body")
+
+	_, err = conn.Write(msg)
 	if err != nil {
 		t.Error("could not write to the TCP server: ", err)
 	}
@@ -121,7 +126,9 @@ func TestLongBody(t *testing.T) {
 
 	longBody := "this is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofijspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfj"
 
-	_, err = conn.Write([]byte(fmt.Sprintf("EWP 13.05 RPC 16 2859\nthis is a header%s", longBody)))
+	msg := getLength(fmt.Sprintf("EWP 13.05 RPC 16 2859\nthis is a header%s", longBody))
+
+	_, err = conn.Write(msg)
 	if err != nil {
 		t.Error("could not write to the TCP server: ", err)
 	}
@@ -137,4 +144,13 @@ func TestLongBody(t *testing.T) {
 	if !reflect.DeepEqual(expected, read) {
 		t.Errorf("return value from TCP server does not match expected value. want=%v, got=%v", expected, read)
 	}
+}
+
+func getLength(message string) []byte {
+	msg := []byte(message)
+
+	length := make([]byte, 4)
+	binary.BigEndian.PutUint32(length, uint32(len(msg)))
+
+	return append(length, msg...)
 }
