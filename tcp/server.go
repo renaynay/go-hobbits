@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/pkg/errors"
 	"github.com/renaynay/go-hobbits/encoding"
 )
 
@@ -29,7 +30,7 @@ func NewServer(host string, port int) *Server {
 func (s *Server) Listen(c Callback) error {
 	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
-		return fmt.Errorf("Error listening: %s", err.Error())
+		return errors.Wrap(err, "error listening")
 	}
 	defer listen.Close()
 
@@ -58,7 +59,7 @@ func (s Server) Addr() net.Addr {
 func (s *Server) handle(conn net.Conn, c Callback) error {
 	read, err := read(conn)
 	if err != nil {
-		return fmt.Errorf("Error reading: %s", err.Error())
+		return errors.Wrap(err, "error reading")
 	}
 
 	decoded, err := encoding.Unmarshal(string(read))
@@ -71,7 +72,7 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 
 		err := s.SendMessage(conn, *decoded)
 		if err != nil {
-			return fmt.Errorf("PONG could not be sent: %s", err.Error())
+			return errors.Wrap(err, "PONG could not be sent")
 		}
 
 		return nil
@@ -91,7 +92,7 @@ func read(conn net.Conn) ([]byte, error){
 
 		bytesRead, err := conn.Read(buf)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading: %s", err.Error())
+			return nil, errors.Wrap(err, "error reading")
 		}
 
 		store = append(store, buf...)
