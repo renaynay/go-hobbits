@@ -56,17 +56,12 @@ func (s Server) Addr() net.Addr {
 
 // handle handles incoming requests
 func (s *Server) handle(conn net.Conn, c Callback) error {
-	// TODO: find message size and store it in var. Wait til someone responds here: https://github.com/whiteblock/hobbits/issues/58#issuecomment-501883490
-	// TODO: if no one responds, write a script to find the message size
-
-	buf := make([]byte, 1024) // TODO: pass in message size here
-
-	_, err := conn.Read(buf)
+	read, err := read(conn)
 	if err != nil {
 		return fmt.Errorf("Error reading: %s", err.Error())
 	}
 
-	decoded, err := encoding.Unmarshal(string(buf))
+	decoded, err := encoding.Unmarshal(string(read))
 	if err != nil {
 		return err
 	}
@@ -85,6 +80,28 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 	go c(conn, *decoded)
 
 	return nil
+}
+
+func read(conn net.Conn) ([]byte, error){
+	store := make([]byte, 0)
+	bufLength := 1024
+
+	for {
+		buf := make([]byte, bufLength)
+
+		bytesRead, err := conn.Read(buf)
+		if err != nil {
+			return nil, fmt.Errorf("Error reading: %s", err.Error())
+		}
+
+		store = append(store, buf...)
+
+		if bytesRead != bufLength {
+			break
+		}
+	}
+
+	return store, nil
 }
 
 // SendMessage sends an encoded message
