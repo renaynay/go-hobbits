@@ -100,17 +100,20 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 	defer conn.Close()
 
-	string, err := encoding.Marshal(message)
+	encoded, err := encoding.Marshal(message)
 	if err != nil {
 		return err
 	}
 
-	encoded := []byte(string)
+	packet := []byte(encoded)
 	packetLength := len(encoded)
+	pktLen := make([]byte, 4)
 
-	binary.BigEndian.PutUint32(encoded[0:], uint32(packetLength))
+	binary.BigEndian.PutUint32(pktLen[0:], uint32(packetLength))
 
-	_, err = conn.Write([]byte(encoded))
+	pktLen = append(pktLen, packet...)
+
+	_, err = conn.Write([]byte(pktLen))
 	if err != nil {
 		return err
 	}
