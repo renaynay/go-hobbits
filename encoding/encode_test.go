@@ -16,12 +16,12 @@ func TestMarshal_Successful(t *testing.T) {
 	}{
 		{
 			encoded: encoding.Message{
-				Version:     "13.05",
+				Version:     uint32(3),
 				Protocol:    encoding.RPC,
 				Header:     []byte("this is a header"),
 				Body:        []byte("this is a body"),
 			},
-			message: "EWP 13.05 RPC 16 14\nthis is a headerthis is a body",
+			message: []byte("EWP 13.05 RPC 16 14\nthis is a headerthis is a body",
 		},
 		{
 			encoded: encoding.Message{
