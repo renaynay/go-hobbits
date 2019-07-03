@@ -4,50 +4,32 @@
 package encoding
 
 import (
+	"encoding/binary"
 	"errors"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
-var versionNumRegex = regexp.MustCompile(`^(\d+\.)(\d+)*$`)
-
 // Unmarshal takes a wire protocol message and parses it
-func Unmarshal(message string) (*Message, error) {
+func Unmarshal(message []byte) (*Message, error) {
 	var decoded Message
 
-	lines := strings.Split(message, "\n")
-	if len(lines) != 2 {
-		return nil, errors.New("message request must contain 2 lines")
+	if string(message[:3]) != "EWP" {
+		return nil, errors.New("protocol unsupported, expecting 'EWP'")
 	}
 
-	metadata := strings.Split(lines[0], " ")
-	if len(metadata) != 5 {
-		return nil, errors.New("not all metadata provided")
+	decoded.Version = binary.BigEndian.Uint32(message[3:7])
+
+	decoded.Protocol = Protocol(message[7])
+	if decoded.Protocol > PING {
+		return nil, errors.New("message protocol unsupported, expecting GOSSIP, RPC or PING")
 	}
 
-	if !versionNumRegex.MatchString(metadata[1]) {
-		return nil, errors.New("EWP version cannot be parsed")
-	}
-	decoded.Version = metadata[1]
+	headerLen := binary.BigEndian.Uint32(message[8:12])
+	bodyLen := binary.BigEndian.Uint32(message[12:16])
 
-	protocol := Protocol(metadata[2])
-	if protocol != RPC && protocol != GOSSIP && protocol != PING {
-		return nil, errors.New("communication protocol unsupported")
-	}
-	decoded.Protocol = protocol
+	decoded.Header = message[16:16+headerLen]
 
-	headLength, err := strconv.Atoi(metadata[3])
-	if err != nil {
-		return nil, errors.New("incorrect metadata format, cannot parse header-length")
-	}
-	decoded.Header = []byte(lines[1][:headLength])
+	decoded.Body = message[16+headerLen:16+headerLen+bodyLen]
 
-	bodyLength, err := strconv.Atoi(metadata[4])
-	if err != nil {
-		return nil, errors.New("incorrect metadata format, cannot parse body-length")
-	}
-	decoded.Body = []byte(lines[1][headLength:headLength+bodyLength])
 
 	return &decoded, nil
 }

@@ -4,18 +4,18 @@
 // By Rene Nayman
 package encoding
 
-type Protocol string
+type Protocol uint8
 
 const (
-	RPC    Protocol = "RPC"
-	GOSSIP Protocol = "GOSSIP"
-	PING   Protocol = "PING"
+	RPC    Protocol = iota
+	GOSSIP
+	PING
 )
 
 // Message represents a parsed Hobbits message.
 // See examples of unparsed and parsed messages here: https://github.com/deltap2p/hobbits/blob/master/specs/protocol.md
 type Message struct {
-	Version  string
+	Version  uint32
 	Protocol Protocol
 	Header   []byte
 	Body     []byte

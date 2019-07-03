@@ -66,12 +66,12 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 			return errors.Wrap(err, "error reading from conn")
 		}
 
-		decoded, err := encoding.Unmarshal(string(buf))
+		decoded, err := encoding.Unmarshal(buf)
 		if err != nil {
 			return err
 		}
 
-		if decoded.Protocol == "PING" {
+		if decoded.Protocol == encoding.PING {
 			decoded.Header = []byte("pong")
 
 			err := s.SendMessage(conn, *decoded)
