@@ -1,27 +1,31 @@
 package encoding
 
 import (
-	"errors"
-	"fmt"
+	"encoding/binary"
 )
 
 // Marshal takes a parsed message and encodes it to a wire protocol message
-func Marshal(message Message) (string, error) {
-	if message.Version == "" {
-		return "", errors.New("cannot marshal message, version not found")
-	}
+func Marshal(message Message) []byte {
+	marshaled := []byte{}
 
-	if message.Protocol == "" {
-		return "", errors.New("cannot marshal message, protocol not found")
-	}
+	marshaled = append(marshaled, []byte("EWP")...)
+	marshaled = append(marshaled, byte(message.Protocol))
 
-	return fmt.Sprintf(
-		"EWP %s %s %d %d\n%s%s",
-		message.Version,
-		message.Protocol,
-		len(string(message.Header)),
-		len(string(message.Body)),
-		string(message.Header),
-		string(message.Body),
-	), nil
+	head := uint32(len(message.Header))
+	headerLen := []byte{}
+
+	binary.BigEndian.PutUint32(headerLen, head)
+
+	body := uint32(len(message.Body))
+	bodyLen := []byte{}
+
+	binary.BigEndian.PutUint32(bodyLen, body)
+
+	marshaled = append(marshaled, headerLen...)
+	marshaled = append(marshaled, bodyLen...)
+
+	marshaled = append(marshaled, message.Header...)
+	marshaled = append(marshaled, message.Body...)
+
+	return marshaled
 }

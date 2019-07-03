@@ -45,7 +45,7 @@ func TestMarshal_Successful(t *testing.T) {
 
 	for i, tt := range test {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			string, _ := encoding.Marshal(tt.encoded)
+			string := encoding.Marshal(tt.encoded)
 			if !reflect.DeepEqual(string, tt.message) {
 				t.Errorf("return value of Marshal did not match expected value. wanted: %v, got: %v", tt.message, string)
 			}

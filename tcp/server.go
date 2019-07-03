@@ -88,10 +88,8 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 
 // SendMessage sends an encoded message
 func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
-	encoded, err := encoding.Marshal(message)
-	if err != nil {
-		return err
-	}
+	encoded := encoding.Marshal(message)
+
 
 	wireMsg := []byte(encoded)
 	packetLength := make([]byte, 4)
@@ -100,7 +98,7 @@ func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 
 	packet := append(packetLength, wireMsg...)
 
-	_, err = conn.Write(packet)
+	_, err := conn.Write(packet)
 	if err != nil {
 		return err
 	}
