@@ -109,21 +109,22 @@ func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 }
 
 func Read(conn net.Conn) ([]byte, error) {
-	pktLen := make([]byte, 4)
+	metadata := make([]byte, 16)
 
-	_, err := conn.Read(pktLen)
+	_, err := conn.Read(metadata)
 	if err != nil {
 		return nil, errors.Wrap(err, "error reading length")
 	}
 
-	length := binary.BigEndian.Uint32(pktLen)
+	headerLen := binary.BigEndian.Uint32(metadata[8:12])
+	bodyLen := binary.BigEndian.Uint32(metadata[12:16])
 
-	buf := make([]byte, length)
+	buf := make([]byte, (headerLen + bodyLen))
 
 	_, err = io.ReadFull(conn, buf)
 	if err != nil {
 		return nil, errors.Wrap(err, "error reading packet")
 	}
 
-	return buf, nil
+	return append(metadata, buf...), nil
 }
