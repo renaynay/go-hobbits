@@ -106,7 +106,7 @@ func read(conn net.Conn) ([]byte, error){
 
 // SendMessage sends an encoded message
 func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
-	defer conn.Close()
+	//defer conn.Close()
 
 	encoded, err := encoding.Marshal(message)
 	if err != nil {
