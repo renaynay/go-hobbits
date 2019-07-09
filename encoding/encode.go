@@ -12,12 +12,12 @@ func Marshal(message Message) []byte {
 	marshaled = append(marshaled, byte(message.Protocol))
 
 	head := uint32(len(message.Header))
-	headerLen := []byte{}
+	headerLen := make([]byte, 4)
 
 	binary.BigEndian.PutUint32(headerLen, head)
 
 	body := uint32(len(message.Body))
-	bodyLen := []byte{}
+	bodyLen := make([]byte, 4)
 
 	binary.BigEndian.PutUint32(bodyLen, body)
 
