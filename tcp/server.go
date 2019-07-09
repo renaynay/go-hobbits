@@ -90,14 +90,7 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 	encoded := encoding.Marshal(message)
 
-	wireMsg := []byte(encoded)
-	packetLength := make([]byte, 4)
-
-	binary.BigEndian.PutUint32(packetLength[0:], uint32(len(wireMsg)))
-
-	packet := append(packetLength, wireMsg...)
-
-	_, err := conn.Write(packet)
+	_, err := conn.Write(encoded)
 	if err != nil {
 		return err
 	}
@@ -105,6 +98,7 @@ func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 	return nil
 }
 
+// Read reads a message from the connection
 func Read(conn net.Conn) ([]byte, error) {
 	metadata := make([]byte, 16)
 

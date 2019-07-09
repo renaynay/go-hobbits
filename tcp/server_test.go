@@ -1,8 +1,6 @@
 package tcp_test
 
 import (
-	"encoding/binary"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -40,7 +38,12 @@ func TestTCP(t *testing.T) {
 		t.Error("could not connect to TCP server: ", err)
 	}
 
-	msg := createPacket("EWP 13.05 RPC 16 14\nthis is a headerthis is a body")
+	msg := encoding.Marshal(encoding.Message{
+		Version:  uint32(3),
+		Protocol: encoding.RPC,
+		Header:   []byte("this is a header"),
+		Body:     []byte("this is a body"),
+	})
 
 	_, err = conn.Write(msg)
 	if err != nil {
@@ -49,7 +52,7 @@ func TestTCP(t *testing.T) {
 	read := <-ch
 
 	expected := encoding.Message{
-		Version:  "13.05",
+		Version:  uint32(3),
 		Protocol: encoding.RPC,
 		Header:   []byte("this is a header"),
 		Body:     []byte("this is a body"),
@@ -62,7 +65,7 @@ func TestTCP(t *testing.T) {
 
 func TestPING(t *testing.T) {
 	server := tcp.NewServer("127.0.0.1", 0)
-	ch := make(chan string)
+	ch := make(chan []byte)
 
 	go server.Listen(func(_ net.Conn, message encoding.Message) {})
 
@@ -85,10 +88,15 @@ func TestPING(t *testing.T) {
 			t.Error(err)
 		}
 
-		ch <- string(read)
+		ch <- read
 	}()
 
-	msg := createPacket("EWP 13.05 PING 4 14\npingthis is a body")
+	msg := encoding.Marshal(encoding.Message{
+		Version:  uint32(3),
+		Protocol: encoding.PING,
+		Header:   []byte("ping"),
+		Body:     []byte("body"),
+	})
 
 	_, err = conn.Write(msg)
 	if err != nil {
@@ -96,61 +104,14 @@ func TestPING(t *testing.T) {
 	}
 
 	readFromCh := <-ch
-	expected := "EWP 13.05 PING 4 14\npongthis is a body"
-
-	if readFromCh != expected {
-		t.Error("server does not send the correct default pong response to ping")
-	}
-}
-
-func TestLongBody(t *testing.T) {
-	server := tcp.NewServer("127.0.0.1", 0)
-	ch := make(chan encoding.Message)
-
-	go server.Listen(func(_ net.Conn, message encoding.Message) {
-		ch <- message
+	expected := encoding.Marshal(encoding.Message{
+		Version:  uint32(3),
+		Protocol: encoding.PING,
+		Header:   []byte("pong"),
+		Body:     []byte("body"),
 	})
 
-	for {
-		if server.Addr() != nil {
-			break
-		}
-
-		time.Sleep(1)
+	if !reflect.DeepEqual(readFromCh, expected) {
+		t.Error("server does not send the correct default pong response to ping")
 	}
-
-	conn, err := net.Dial("tcp", server.Addr().String())
-	if err != nil {
-		t.Error("could not connect to TCP server: ", err)
-	}
-
-	longBody := "this is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofiajspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfjthis is an extremely long body that is meant to be very very long asdsadofa asdpoifajpsdofijaspdof apofiajspdofajspdofjaspdofijaspdofjasdpofasjpdofijspdfoiajspdofiajspdofiajspdofjaspdofjapsdoifjapsodfijpasodfijaspdofjaspdofapsdofiaspdofijapsdofpasdoifjapsodfj"
-
-	msg := createPacket(fmt.Sprintf("EWP 13.05 RPC 16 2859\nthis is a header%s", longBody))
-
-	_, err = conn.Write(msg)
-	if err != nil {
-		t.Error("could not write to the TCP server: ", err)
-	}
-	read := <-ch
-
-	expected := encoding.Message{
-		Version:  "13.05",
-		Protocol: encoding.RPC,
-		Header:   []byte("this is a header"),
-		Body:     []byte(longBody),
-	}
-
-	if !reflect.DeepEqual(expected, read) {
-		t.Errorf("return value from TCP server does not match expected value. want=%v, got=%v", expected, read)
-	}
-}
-
-func createPacket(message string) []byte {
-	msg := []byte(message)
-
-	length := make([]byte, 4)
-	binary.BigEndian.PutUint32(length, uint32(len(msg)))
-
-	return append(length, msg...)
 }
