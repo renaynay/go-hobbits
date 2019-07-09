@@ -7,7 +7,7 @@ package encoding
 type Protocol uint8
 
 const (
-	RPC    Protocol = iota
+	RPC Protocol = iota
 	GOSSIP
 	PING
 )

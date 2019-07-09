@@ -18,6 +18,7 @@ func Unmarshal(message []byte) (*Message, error) {
 	decoded.Version = binary.BigEndian.Uint32(message[3:7])
 
 	decoded.Protocol = Protocol(message[7])
+
 	if decoded.Protocol > PING {
 		return nil, errors.New("message protocol unsupported, expecting GOSSIP, RPC or PING")
 	}

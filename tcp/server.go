@@ -90,7 +90,6 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 	encoded := encoding.Marshal(message)
 
-
 	wireMsg := []byte(encoded)
 	packetLength := make([]byte, 4)
 
