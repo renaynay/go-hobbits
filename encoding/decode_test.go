@@ -1,7 +1,6 @@
 package encoding_test
 
 import (
-	"errors"
 	"reflect"
 	"strconv"
 	"testing"
@@ -9,102 +8,56 @@ import (
 	"github.com/renaynay/go-hobbits/encoding"
 )
 
-func TestUnmarshal_Successful(t *testing.T) {
-	var test = []struct {
-		message string
-		output  encoding.Message
+func TestUnmarshal(t *testing.T) { // TODO: why the fuck isn't this working?
+	var tests = []struct {
+		message []byte
+		decoded encoding.Message
 	}{
 		{
-			message: "EWP 13.05 RPC 16 14\nthis is a headerthis is a body",
-			output: encoding.Message{
-				Version:  "13.05",
+			message: []byte{69, 87, 80, 0, 0, 0, 3, 0, 0, 0, 0, 16, 0, 0, 0, 14, 116, 104, 105, 115, 32, 105, 115, 32, 97, 32, 104, 101, 97, 100, 101, 114, 116, 104, 105, 115, 32, 105, 115, 32, 97, 32, 98, 111, 100, 121},
+			decoded: encoding.Message{
+				Version: uint32(3),
 				Protocol: encoding.RPC,
-				Header:   []byte("this is a header"),
-				Body:     []byte("this is a body"),
+				Header: []byte("this is a header"),
+				Body: []byte("this is a body"),
 			},
 		},
 		{
-			message: "EWP 13.05 GOSSIP 7 12\ntestingtesting body",
-			output: encoding.Message{
-				Version:  "13.05",
+			message: []byte{69, 87, 80, 0, 0, 0, 3, 1, 0, 0, 0, 16, 0, 0, 0, 14, 116, 104, 105, 115, 32, 105, 115, 32, 97, 32, 104, 101, 97, 100, 101, 114, 116, 104, 105, 115, 32, 105, 115, 32, 97, 32, 98, 111, 100, 121},
+			decoded: encoding.Message{
+				Version: uint32(3),
 				Protocol: encoding.GOSSIP,
-				Header:   []byte("testing"),
-				Body:     []byte("testing body"),
+				Header: []byte("this is a header"),
+				Body: []byte("this is a body"),
 			},
 		},
 		{
-			message: "EWP 1230329483.05392489 RPC 4 4\ntesttest",
-			output: encoding.Message{
-				Version:  "1230329483.05392489",
-				Protocol: encoding.RPC,
-				Header:   []byte("test"),
-				Body:     []byte("test"),
-			},
-		},
-		{
-			message: "EWP 1230329483.05392489 PING 4 4\ntesttest",
-			output: encoding.Message{
-				Version:  "1230329483.05392489",
-				Protocol: "PING",
-				Header:   []byte("test"),
-				Body:     []byte("test"),
+			message: []byte{69, 87, 80, 0, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, 0, 0, 112, 105, 110, 103},
+			decoded: encoding.Message{
+				Version: uint32(3),
+				Protocol: encoding.PING,
+				Header: []byte("ping"),
+				Body: []byte(""),
 			},
 		},
 	}
 
-	for i, tt := range test {
+	for i, tt := range tests{
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			output, _ := encoding.Unmarshal(tt.message)
-			if !reflect.DeepEqual(*output, tt.output) {
-				t.Errorf("return value of Unmarshal does not match expected value")
+			unmarshaled, err := encoding.Unmarshal(tt.message)
+			if err != nil {
+				t.Error(err.Error())
 			}
-		})
-	}
-}
 
-func TestUnmarshal_Unsuccessful(t *testing.T) {
-	var test = []struct {
-		message string
-		err     error
-	}{
-		{
-			message: "EWP 13.05 RPC blahblahblah json 16 14this is a headerthis is a body",
-			err:     errors.New("message request must contain 2 lines"),
-		},
-		{
-			message: "EWP 13.05 7 12\ntestingtesting body",
-			err:     errors.New("not all metadata provided"),
-		},
-		{
-			message: "EWP 123032948392489 RPC 4 4\ntesttest",
-			err:     errors.New("EWP version cannot be parsed"),
-		},
-		{
-			message: "EWP 123032948.392489 notrpc 4 4\ntesttest",
-			err:     errors.New("communication protocol unsupported"),
-		},
-		{
-			message: "EWP 123032948.392489 GOSSIP f 4\ntesttest",
-			err:     errors.New("incorrect metadata format, cannot parse header-length"),
-		},
-		{
-			message: "EWP 123032948.392489 GOSSIP 4 f\ntesttest",
-			err:     errors.New("incorrect metadata format, cannot parse body-length"),
-		},
-	}
-
-	for i, tt := range test {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			_, err := encoding.Unmarshal(tt.message)
-			if !reflect.DeepEqual(err, tt.err) {
-				t.Errorf("return value of Unmarshal did not match expected value")
+			if !reflect.DeepEqual(*unmarshaled, tt.decoded) {
+				t.Error("return value of Unmarshal does not match expected value")
 			}
 		})
 	}
 }
 
 func BenchmarkUnmarshal(b *testing.B) {
-	for i := 0; i <= b.N; i++ {
-		encoding.Unmarshal("EWP 13.05 RPC 16 14\nthis is a headerthis is a body")
+	for n := 0; n < b.N; n++ {
+		encoding.Unmarshal([]byte{69, 87, 80, 0, 0, 0, 3, 2, 0, 0, 0, 4, 0, 0, 0, 0, 112, 105, 110, 103})
 	}
 }

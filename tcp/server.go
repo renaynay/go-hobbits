@@ -3,9 +3,12 @@
 package tcp
 
 import (
+	"encoding/binary"
 	"fmt"
+	"io"
 	"log"
 	"net"
+
 	"github.com/pkg/errors"
 	"github.com/renaynay/go-hobbits/encoding"
 )
@@ -44,6 +47,7 @@ func (s *Server) Listen(c Callback) error {
 		go func() {
 			err := s.handle(conn, c)
 			if err != nil {
+				conn.Close()
 				log.Print(err)
 			}
 		}()
@@ -56,67 +60,64 @@ func (s Server) Addr() net.Addr {
 
 // handle handles incoming requests
 func (s *Server) handle(conn net.Conn, c Callback) error {
-	read, err := read(conn)
-	if err != nil {
-		return errors.Wrap(err, "error reading")
-	}
-
-	decoded, err := encoding.Unmarshal(string(read))
-	if err != nil {
-		return err
-	}
-
-	if decoded.Protocol == "PING" {
-		decoded.Header = []byte("pong")
-
-		err := s.SendMessage(conn, *decoded)
-		if err != nil {
-			return errors.Wrap(err, "PONG could not be sent")
-		}
-
-		return nil
-	}
-
-	go c(conn, *decoded)
-
-	return nil
-}
-
-func read(conn net.Conn) ([]byte, error){
-	store := make([]byte, 0)
-	bufLength := 1024
-
 	for {
-		buf := make([]byte, bufLength)
-
-		bytesRead, err := conn.Read(buf)
+		buf, err := Read(conn)
 		if err != nil {
-			return nil, errors.Wrap(err, "error reading")
+			return errors.Wrap(err, "error reading from conn")
 		}
 
-		store = append(store, buf...)
-
-		if bytesRead != bufLength {
-			break
+		decoded, err := encoding.Unmarshal(buf)
+		if err != nil {
+			return err
 		}
+
+		if decoded.Protocol == encoding.PING {
+			decoded.Header = []byte("pong")
+
+			err := s.SendMessage(conn, *decoded)
+			if err != nil {
+				return errors.Wrap(err, "PONG could not be sent")
+			}
+
+			continue
+		}
+
+		go c(conn, *decoded)
 	}
-
-	return store, nil
 }
 
 // SendMessage sends an encoded message
 func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
-	//defer conn.Close()
+  // defer conn.Close()
+  
+	encoded := encoding.Marshal(message)
 
-	encoded, err := encoding.Marshal(message)
-	if err != nil {
-		return err
-	}
-
-	_, err = conn.Write([]byte(encoded))
+	_, err := conn.Write(encoded)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// Read reads a message from the connection
+func Read(conn net.Conn) ([]byte, error) {
+	metadata := make([]byte, 16)
+
+	_, err := conn.Read(metadata)
+	if err != nil {
+		return nil, errors.Wrap(err, "error reading length")
+	}
+
+	headerLen := binary.BigEndian.Uint32(metadata[8:12])
+	bodyLen := binary.BigEndian.Uint32(metadata[12:16])
+
+	buf := make([]byte, (headerLen + bodyLen))
+
+	_, err = io.ReadFull(conn, buf)
+	if err != nil {
+		return nil, errors.Wrap(err, "error reading packet")
+	}
+
+	return append(metadata, buf...), nil
 }
