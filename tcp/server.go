@@ -109,7 +109,7 @@ func Read(conn net.Conn) ([]byte, error) {
 		return nil, errors.Wrap(err, "error reading length")
 	}
 
-	fmt.Println(metadata) // TODO delete
+	fmt.Println(string(metadata)) // TODO delete
 
 	headerLen := binary.BigEndian.Uint32(metadata[8:12])
 	bodyLen := binary.BigEndian.Uint32(metadata[12:16])
