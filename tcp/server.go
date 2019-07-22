@@ -47,7 +47,7 @@ func (s *Server) Listen(c Callback) error {
 		go func() {
 			err := s.handle(conn, c)
 			if err != nil {
-				conn.Close()
+				//conn.Close()
 				fmt.Println("closed the conn, sorry!") // TODO delete
 				log.Print(err)
 			}
