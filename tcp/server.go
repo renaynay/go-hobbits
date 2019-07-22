@@ -102,12 +102,14 @@ func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 
 // Read reads a message from the connection
 func Read(conn net.Conn) ([]byte, error) {
-	metadata := make([]byte, 16)
+	metadata := make([]byte, 1024) // TODO change back to 16
 
 	_, err := conn.Read(metadata)
 	if err != nil {
 		return nil, errors.Wrap(err, "error reading length")
 	}
+
+	fmt.Println(metadata) // TODO delete
 
 	headerLen := binary.BigEndian.Uint32(metadata[8:12])
 	bodyLen := binary.BigEndian.Uint32(metadata[12:16])
