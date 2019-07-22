@@ -63,7 +63,7 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 	for {
 		buf, err := Read(conn)
 		if err != nil {
-			rando := []byte{}
+			rando := make([]byte, 1024)
 			_, err := io.ReadFull(conn, rando)
 			fmt.Println(rando) // TODO delete all this garbage
 
