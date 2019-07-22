@@ -1,6 +1,7 @@
 package tcp_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -61,6 +62,112 @@ func TestTCP(t *testing.T) {
 	if !reflect.DeepEqual(expected, read) {
 		t.Errorf("return value from TCP server does not match expected value. want=%v, got=%v", expected, read)
 	}
+}
+
+func TestTCP_Empty(t *testing.T) {
+	server := tcp.NewServer("127.0.0.1", 0)
+	ch := make(chan encoding.Message)
+
+	go server.Listen(func(_ net.Conn, message encoding.Message) {
+		ch <- message
+	})
+
+	for {
+		if server.Addr() != nil {
+			break
+		}
+
+		time.Sleep(1)
+	}
+
+	conn, err := net.Dial("tcp", server.Addr().String())
+	if err != nil {
+		t.Error("could not connect to TCP server: ", err)
+	}
+
+	msg := encoding.Marshal(encoding.Message{
+		Version:  uint32(3),
+		Protocol: encoding.RPC,
+		Header:   []byte{},
+		Body:     []byte{},
+	})
+
+	_, err = conn.Write(msg)
+	if err != nil {
+		t.Error("could not write to the TCP server: ", err)
+	}
+	read := <-ch
+
+	expected := encoding.Message{
+		Version:  uint32(3),
+		Protocol: encoding.RPC,
+		Header:   []byte{},
+		Body:     []byte{},
+	}
+
+	if !reflect.DeepEqual(expected, read) {
+		t.Errorf("return value from TCP server does not match expected value. want=%v, got=%v", expected, read)
+	}
+}
+
+func TestTCP_Multi(t *testing.T) {
+	server := tcp.NewServer("127.0.0.1", 0)
+	ch := make(chan encoding.Message)
+
+	go server.Listen(func(_ net.Conn, message encoding.Message) {
+		ch <- message
+	})
+
+	for {
+		if server.Addr() != nil {
+			break
+		}
+
+		time.Sleep(1)
+	}
+
+	conn, err := net.Dial("tcp", server.Addr().String())
+	if err != nil {
+		t.Error("could not connect to TCP server: ", err)
+	}
+
+	msg := encoding.Marshal(encoding.Message{
+		Version:  uint32(3),
+		Protocol: encoding.RPC,
+		Header:   []byte{},
+		Body:     []byte{},
+	})
+
+	_, err = conn.Write(msg)
+	if err != nil {
+		t.Error("could not write to the TCP server: ", err)
+	}
+	read := <-ch
+
+	fmt.Println(read)
+
+	msg2 := encoding.Marshal(encoding.Message{
+		Version:  uint32(3),
+		Protocol: encoding.RPC,
+		Header:   []byte("second message lol"),
+		Body:     []byte{},
+	})
+
+	_, err = conn.Write(msg2)
+	if err != nil {
+		t.Error("could not write to the TCP server: ", err)
+	}
+	read = <-ch
+
+	fmt.Println(read)
+
+
+	//expected := encoding.Message{
+	//	Version:  uint32(3),
+	//	Protocol: encoding.RPC,
+	//	Header:   []byte{},
+	//	Body:     []byte{},
+	//}
 }
 
 func TestPING(t *testing.T) {
