@@ -65,7 +65,7 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 		if err != nil {
 			rando := make([]byte, 1024)
 			_, err := io.ReadFull(conn, rando)
-			fmt.Println(rando) // TODO delete all this garbage
+			fmt.Println(string(rando)) // TODO delete all this garbage
 
 			return errors.Wrap(err, "error reading from conn")
 		}
