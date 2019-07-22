@@ -63,6 +63,10 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 	for {
 		buf, err := Read(conn)
 		if err != nil {
+			rando := []byte{}
+			_, err := io.ReadFull(conn, rando)
+			fmt.Println(rando) // TODO delete all this garbage
+
 			return errors.Wrap(err, "error reading from conn")
 		}
 
@@ -102,14 +106,12 @@ func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 
 // Read reads a message from the connection
 func Read(conn net.Conn) ([]byte, error) {
-	metadata := make([]byte, 16) // TODO change back to 16
+	metadata := make([]byte, 16)
 
 	_, err := conn.Read(metadata)
 	if err != nil {
 		return nil, errors.Wrap(err, "error reading length")
 	}
-
-	fmt.Println(string(metadata)) // TODO delete
 
 	headerLen := binary.BigEndian.Uint32(metadata[8:12])
 	bodyLen := binary.BigEndian.Uint32(metadata[12:16])
