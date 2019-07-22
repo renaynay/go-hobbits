@@ -102,7 +102,7 @@ func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 
 // Read reads a message from the connection
 func Read(conn net.Conn) ([]byte, error) {
-	metadata := make([]byte, 1024) // TODO change back to 16
+	metadata := make([]byte, 16) // TODO change back to 16
 
 	_, err := conn.Read(metadata)
 	if err != nil {
