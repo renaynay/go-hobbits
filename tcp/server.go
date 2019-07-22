@@ -66,6 +66,10 @@ func (s *Server) handle(conn net.Conn, c Callback) error {
 			return errors.Wrap(err, "error reading from conn")
 		}
 
+		if buf == nil {
+			continue
+		}
+
 		decoded, err := encoding.Unmarshal(buf)
 		if err != nil {
 			return err
@@ -104,7 +108,11 @@ func (*Server) SendMessage(conn net.Conn, message encoding.Message) error {
 func Read(conn net.Conn) ([]byte, error) {
 	metadata := make([]byte, 16)
 
-	_, err := conn.Read(metadata)
+	n, err := io.ReadAtLeast(conn, metadata, 16)
+	if n == 0 {
+		return nil, nil
+	}
+
 	if err != nil {
 		return nil, errors.Wrap(err, "error reading length")
 	}
